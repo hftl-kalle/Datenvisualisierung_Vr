@@ -1,19 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEditor;
+using System.IO;
 using System;
 
 public class CSVReader : MonoBehaviour {
 
-    public void openCsvFromFileChooser() {
+    public void openCsvFromFolder() {
         CSVDataObject csvData;
-        string file = EditorUtility.OpenFilePanel("Choose csv", Environment.GetFolderPath(Environment.SpecialFolder.MyComputer), "csv");
-        if (file.Length != 0) {
-            csvData = CSVParser.loadCsv(file);
+        string directory = @Application.dataPath + "/../csv/";
+        Debug.Log(directory);
 
-        } else {
-            EditorUtility.DisplayDialog("Select csv", "You must select a valid csv", "Ok");
+        DirectoryInfo dirInfo = new DirectoryInfo(directory);
+        FileInfo[] files = dirInfo.GetFiles("*.csv");
+
+        foreach (FileInfo f in files) {
+            Debug.Log(f.Name);
         }
+
+        
+           // csvData = CSVParser.loadCsv(file);
+
+        
     }
 
 }
