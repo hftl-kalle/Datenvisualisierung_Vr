@@ -16,11 +16,8 @@ public class CSVReader : MonoBehaviour {
 
         foreach (FileInfo f in files) {
             Debug.Log(f.Name);
+            csvData = CSVParser.loadCsv(f.FullName);
         }
-
-        
-           // csvData = CSVParser.loadCsv(file);
-
         
     }
 

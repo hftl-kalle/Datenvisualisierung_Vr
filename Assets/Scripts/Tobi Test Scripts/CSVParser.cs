@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
 using UnityEngine;
+using System.Collections;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Text;
 
 public static class CSVParser {
 
@@ -9,70 +12,99 @@ public static class CSVParser {
 
         if (File.Exists(file)) {
 
-            string SEMICOLON_SANATZER = "/u003B/";
+            string SEMICOLON_SANATIZER = "/u003B/";
 
             string content = System.IO.File.ReadAllText(file);
+            string regex = "\"(.*?)\"";
+            foreach (Match match in Regex.Matches(content, regex))
+                content = content.Replace(match.Value, match.Value.Replace(";", SEMICOLON_SANATIZER));
+            content = content.Replace("\"", "");
 
             string[] lines = content.Replace('\r', '\n').Replace("\r\n", "\n").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            string regex = "\"(.*?)\"";
-
-            for (int i = 0; i < lines.GetLength(0); i++) {
-                foreach (Match match in Regex.Matches(lines[i], regex))
-                    lines[i] = lines[i].Replace(match.Value, match.Value.Replace(";", SEMICOLON_SANATZER));
-            }
-            int rowCount = lines.GetLength(0);
-            int colCount = lines[0].Split(';').GetLength(0);
-            string[,] data = new string[rowCount,colCount];
-
-            for (int r = 0; r < rowCount; r++) {
-                for (int c = 0; c < colCount; c++) {
-                    data[r,c] = lines[r].Split(';')[c].Replace(SEMICOLON_SANATZER, ";");
-                }
+            List<Object3D> dataList = new List<Object3D>();
+            for (int r = 0; r < lines.Length; r++) {
+                dataList.Add(new Object3D(lines[r].Split(';')[0].Replace(SEMICOLON_SANATIZER, ";"),
+                    lines[r].Split(';')[1].Replace(SEMICOLON_SANATIZER, ";"),
+                    lines[r].Split(';')[2].Replace(SEMICOLON_SANATIZER, ";")));
             }
 
-            //<<<<<<<DEBUG
-            for (int m = 0; m < data.GetLength(0); ++m) {
-                for (int n = 0; n < data.GetLength(1); ++n) {
-                    Debug.Log(data[m, n]);
-                }  
-            }
+            Object3D headlines = dataList[0];
+            dataList.Remove(dataList[0]);
 
-            return new CSVDataObject(file, data);
-
-            //<<<<<<<DEBUG
+            CSVDataObject obj = new CSVDataObject(file, dataList, (string) headlines.getX(), (string) headlines.getY(), (string) headlines.getZ());
+            Debug.Log(obj.toString());
+            return obj;
         }
-
         return null;
-
     }
-
-    
+   
 }
 
 public class CSVDataObject {
 
-    private int rowCount = 0;
-    private int colCount = 0;
+    private List<Object3D> dataList = new List<Object3D>();
+    private string headlineX;
+    private string headlineY;
+    private string headlineZ;
     private string file;
-    private string[,] data;
 
-    public CSVDataObject(string file, string[,] data) {
-        this.data = data;
+    public CSVDataObject(string file, List<Object3D> data, string headX, string headY, string headZ) {
+        this.dataList = data;
         this.file = file;
-        this.rowCount = data.GetLength(0);
-        this.colCount = data.GetLength(1);
+        this.headlineX = headX;
+        this.headlineY = headY;
+        this.headlineZ = headZ;
     }
 
-    public string[,] getData() {
-        return data;
+    public List<Object3D> getData() {
+        return dataList;
     }
 
-    public int getRowCount() {
-        return rowCount;
+    public string[] getHeadlines() {
+        return new string[3] { this.headlineX, this.headlineY, this.headlineZ };
     }
 
-    public int getColCount() {
-        return colCount;
+    public string toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("x: ").Append(headlineX);
+        sb.Append(" y: ").Append(headlineY);
+        sb.Append(" z: ").Append(headlineZ).Append("\n");
+        foreach (Object3D obj3D in dataList)
+            sb.Append(obj3D.toString()).Append("\n");
+        return sb.ToString();
+    }
+
+}
+
+public class Object3D {
+    private object x;
+    private object y;
+    private object z;
+
+    public Object3D(object x, object y, object z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public object getX() {
+        return this.x;
+    }
+
+    public object getY() {
+        return this.y;
+    }
+
+    public object getZ() {
+        return this.z;
+    }
+
+    public string toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("x: ").Append( (string) x);
+        sb.Append(" y: ").Append( (string) y);
+        sb.Append(" z: ").Append( (string) z);
+        return sb.ToString();
     }
 }
