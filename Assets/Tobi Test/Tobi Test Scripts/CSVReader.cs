@@ -15,10 +15,11 @@ public class CSVReader : MonoBehaviour {
 
         DirectoryInfo dirInfo = new DirectoryInfo(directory);
         FileInfo[] files = dirInfo.GetFiles("*.csv");
+        System.Random rnd = new System.Random();
 
         for (int i = 0; i < files.Length; i++) {
             FileInfo f = files[i];
-            GameObject inst = (GameObject) Instantiate(Resources.Load("Clipboard"), new Vector3(-150.0f + i * 150.0f,0.0f,-300.0f) , Quaternion.Euler(0.0f,270.0f,0.0f));
+            GameObject inst = (GameObject) Instantiate(Resources.Load("Clipboard"), new Vector3((float) rnd.Next(-160, 550), 1000f + i * 250f, (float)rnd.Next(-500, -200)) , Quaternion.Euler((float)rnd.Next(-30, 30), (float)rnd.Next(-120, -60), (float)rnd.Next(-30, 30)));
             ClipboardScript script = inst.AddComponent<ClipboardScript>();
             script.file = f;
         }
