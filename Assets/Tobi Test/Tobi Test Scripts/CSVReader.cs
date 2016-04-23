@@ -19,7 +19,7 @@ public class CSVReader : MonoBehaviour {
 
         for (int i = 0; i < files.Length; i++) {
             FileInfo f = files[i];
-            GameObject inst = (GameObject) Instantiate(Resources.Load("Clipboard"), new Vector3((float) rnd.Next(-160, 550), 1000f + i * 250f, (float)rnd.Next(-500, -200)) , Quaternion.Euler((float)rnd.Next(-30, 30), (float)rnd.Next(-120, -60), (float)rnd.Next(-30, 30)));
+            GameObject inst = (GameObject) Instantiate(Resources.Load("Clipboard"), new Vector3((float) rnd.Next((int)transform.position.x-350, (int)transform.position.x + 350), (int)transform.position.y + i * 250f, (float)rnd.Next((int)transform.position.z - 350, (int)transform.position.z + 350)) , Quaternion.Euler((float)rnd.Next(-30, 30), (float)rnd.Next(-120, -60), (float)rnd.Next(-30, 30)));
             ClipboardScript script = inst.AddComponent<ClipboardScript>();
             script.file = f;
         }
@@ -33,5 +33,8 @@ class ClipboardScript : MonoBehaviour {
 
     void OnMouseDown() {
         CSVDataObject csvData = CSVParser.loadCsv(file.FullName);
+        if (csvData == null) {
+            EditorUtility.DisplayDialog("Error","Your csv seems to be invalid. Atleast x and y are required","Ok");
+        }
     }
 }

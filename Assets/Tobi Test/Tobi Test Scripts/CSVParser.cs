@@ -22,14 +22,24 @@ public static class CSVParser {
 
             string[] lines = content.Replace('\r', '\n').Replace("\r\n", "\n").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            List<Object3D> dataList = new List<Object3D>();
-            for (int r = 0; r < lines.Length; r++) {
-                dataList.Add(new Object3D(lines[r].Split(';')[0].Replace(SEMICOLON_SANATIZER, ";"),
-                    lines[r].Split(';')[1].Replace(SEMICOLON_SANATIZER, ";"),
-                    lines[r].Split(';')[2].Replace(SEMICOLON_SANATIZER, ";")));
+            List<MultidimensionalObject> dataList = new List<MultidimensionalObject>();
+            for (int l = 0; l < lines.Length; l++) {
+                object[] temp = new object[4];
+                if (lines[l].Split(';').Length < 2 && lines[l].Length > 0) {
+                    return null;
+                }
+                for (int i = 0; i < lines[l].Split(';').Length; i++) {
+                    if (i >= 4) break;
+                    float f;
+                    if (float.TryParse(lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";"), out f))
+                        temp[i] = f;
+                    else
+                        temp[i] = lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";");
+                }
+                dataList.Add(new MultidimensionalObject(temp[0],temp[1],temp[2],temp[3]));
             }
 
-            Object3D headlines = dataList[0];
+            MultidimensionalObject headlines = dataList[0];
             dataList.Remove(dataList[0]);
 
             CSVDataObject obj = new CSVDataObject(file, dataList, (string) headlines.getX(), (string) headlines.getY(), (string) headlines.getZ());
@@ -43,13 +53,13 @@ public static class CSVParser {
 
 public class CSVDataObject {
 
-    private List<Object3D> dataList = new List<Object3D>();
+    private List<MultidimensionalObject> dataList = new List<MultidimensionalObject>();
     private string headlineX;
     private string headlineY;
     private string headlineZ;
     private string file;
 
-    public CSVDataObject(string file, List<Object3D> data, string headX, string headY, string headZ) {
+    public CSVDataObject(string file, List<MultidimensionalObject> data, string headX, string headY, string headZ) {
         this.dataList = data;
         this.file = file;
         this.headlineX = headX;
@@ -57,7 +67,7 @@ public class CSVDataObject {
         this.headlineZ = headZ;
     }
 
-    public List<Object3D> getData() {
+    public List<MultidimensionalObject> getData() {
         return dataList;
     }
 
@@ -70,22 +80,24 @@ public class CSVDataObject {
         sb.Append("x: ").Append(headlineX);
         sb.Append(" y: ").Append(headlineY);
         sb.Append(" z: ").Append(headlineZ).Append("\n");
-        foreach (Object3D obj3D in dataList)
+        foreach (MultidimensionalObject obj3D in dataList)
             sb.Append(obj3D.toString()).Append("\n");
         return sb.ToString();
     }
 
 }
 
-public class Object3D {
+public class MultidimensionalObject {
     private object x;
     private object y;
     private object z;
+    private object range;
 
-    public Object3D(object x, object y, object z) {
+    public MultidimensionalObject(object x, object y, object z = null, object range = null) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.range = range;
     }
 
     public object getX() {
@@ -100,11 +112,16 @@ public class Object3D {
         return this.z;
     }
 
+    public object getRange() {
+        return this.range;
+    }
+
     public string toString() {
         StringBuilder sb = new StringBuilder();
-        sb.Append("x: ").Append( (string) x);
-        sb.Append(" y: ").Append( (string) y);
-        sb.Append(" z: ").Append( (string) z);
+        sb.Append("x: ").Append(this.x != null ? this.x.ToString() : "Null");
+        sb.Append(" y: ").Append(this.y != null ? this.y.ToString() : "Null");
+        sb.Append(" z: ").Append(this.z != null ? this.z.ToString() : "Null");
+        sb.Append(" range: ").Append(this.range != null ? this.range.ToString() : "Null");
         return sb.ToString();
     }
 }
