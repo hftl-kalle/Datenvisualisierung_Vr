@@ -33,6 +33,8 @@ class ClipboardScript : MonoBehaviour {
 
     void OnMouseDown() {
         CSVDataObject csvData = CSVParser.loadCsv(file.FullName);
+        DataController dc = new DataController(csvData);
+        dc.generateGraphChart();
         if (csvData == null) {
             EditorUtility.DisplayDialog("Error","Your csv seems to be invalid. Atleast x and y are required","Ok");
         }
