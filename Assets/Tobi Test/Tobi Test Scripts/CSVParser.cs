@@ -18,7 +18,6 @@ public static class CSVParser {
             string regex = "\"(.*?)\"";
             foreach (Match match in Regex.Matches(content, regex))
                 content = content.Replace(match.Value, match.Value.Replace(";", SEMICOLON_SANATIZER));
-            content = content.Replace("\"", "");
 
             string[] lines = content.Replace('\r', '\n').Replace("\r\n", "\n").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -31,6 +30,11 @@ public static class CSVParser {
                 for (int i = 0; i < lines[l].Split(';').Length; i++) {
                     if (i >= 4) break;
                     float f;
+                    if (Regex.IsMatch(lines[l].Split(';')[i],regex)) {
+
+                        temp[i] = lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";").Replace("\"","");
+                        continue;
+                    }
                     if (float.TryParse(lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";"), out f))
                         temp[i] = f;
                     else
@@ -41,6 +45,12 @@ public static class CSVParser {
 
             MultidimensionalObject headlines = dataList[0];
             dataList.Remove(dataList[0]);
+
+            if (dataList.Exists(x => x.getX() is string)) dataList.ForEach(x => x.setX(x.getX().ToString()));
+            if (dataList.Exists(x => x.getY() is string)) dataList.ForEach(x => x.setY(x.getY().ToString()));
+            if (dataList.Exists(x => x.getZ() is string)) dataList.ForEach(x => x.setZ(x.getZ().ToString()));
+
+            dataList.ForEach(x => Debug.Log(x.toString()));
 
             CSVDataObject obj = new CSVDataObject(file, dataList, (string) headlines.getX(), (string) headlines.getY(), (string) headlines.getZ());
             Debug.Log(obj.toString());
@@ -69,6 +79,30 @@ public class CSVDataObject {
 
     public List<MultidimensionalObject> getData() {
         return dataList;
+    }
+
+    public List<object> getAllX() {
+        List<object> objects = new List<object>();
+        dataList.ForEach(x => objects.Add(x.getX()));
+        return objects;
+    }
+
+    public List<object> getAllY() {
+        List<object> objects = new List<object>();
+        dataList.ForEach(x => objects.Add(x.getY()));
+        return objects;
+    }
+
+    public List<object> getAllZ() {
+        List<object> objects = new List<object>();
+        dataList.ForEach(x => objects.Add(x.getZ()));
+        return objects;
+    }
+
+    public List<object> getAllRange() {
+        List<object> objects = new List<object>();
+        dataList.ForEach(x => objects.Add(x.getRange()));
+        return objects;
     }
 
     public string[] getHeadlines() {
@@ -116,12 +150,37 @@ public class MultidimensionalObject {
         return this.range;
     }
 
+    public void setX(object x) {
+        this.x = x;
+    }
+
+    public void setY(object y) {
+        this.y = y;
+    }
+    public void setZ(object z) {
+        this.z = z;
+    }
+    public void setRange(object range) {
+        this.range = range;
+    }
+    public object[] getObjectArray() {
+        return new object[4] {this.x,this.y,this.z,this.range};
+    }
+
     public string toString() {
         StringBuilder sb = new StringBuilder();
         sb.Append("x: ").Append(this.x != null ? this.x.ToString() : "Null");
-        sb.Append(" y: ").Append(this.y != null ? this.y.ToString() : "Null");
-        sb.Append(" z: ").Append(this.z != null ? this.z.ToString() : "Null");
-        sb.Append(" range: ").Append(this.range != null ? this.range.ToString() : "Null");
+        if (this.x is string) sb.Append("\n is string");
+        else sb.Append("\n is float");
+        sb.Append("\ny: ").Append(this.y != null ? this.y.ToString() : "Null");
+        if (this.y is string) sb.Append("\n is string");
+        else sb.Append("\n is float");
+        sb.Append("\nz: ").Append(this.z != null ? this.z.ToString() : "Null");
+        if (this.z is string) sb.Append("\n is string");
+        else sb.Append("\n is float");
+        sb.Append("\nrange: ").Append(this.range != null ? this.range.ToString() : "Null");
+        if (this.range is string) sb.Append("\n is string");
+        else sb.Append("\n is float");
         return sb.ToString();
     }
 }

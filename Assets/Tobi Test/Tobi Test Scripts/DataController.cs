@@ -7,31 +7,50 @@ public class DataController {
 
     private CSVDataObject data;
     private Vector3 origin = new Vector3(0.0f,25.0f,0.0f);
-    private Vector3 length = new Vector3(5000f,1500f,5000f);
+    private Vector3 length = new Vector3(5000f,1500f,2500f);
 
     public DataController(CSVDataObject csvData) {
         this.data = csvData;
     }
 
-    public void generateGraphChart() {
-        List<GameObject> points = new List<GameObject>();
-    
-        foreach (MultidimensionalObject obj in data.getData()) {
-            float x = (obj.getX() is float) ? (float)obj.getX() : origin.x;
-            float y = (obj.getY() is float) ? (float)obj.getY() : origin.y;
-            float z = (obj.getZ() is float) ? (float)obj.getZ() : origin.z;
+    private float safeGetValueFromMap(Dictionary<string,float> d,string s) {
+        if (d.ContainsKey(s)) {
+            Debug.Log("key: " + s + "\nvalue: " + d[s].ToString());
+            return d[s];
+        } else {
+            d.Add(s, d.Keys.Count);
+            Debug.Log("key: " + s + "\nvalue: " + d[s]);
+            return d[s];
+        }
+    }
 
-            float posX = length.x / (getUpperEndX() - getLowerEndX() + 1) * (x - getLowerEndX() + 1);
-            float posY = length.y / (getUpperEndY() - getLowerEndY() + 1) * (y - getLowerEndY() + 1);
-            float posZ = length.z / (getUpperEndZ() - getLowerEndZ() + 1) * (z - getLowerEndZ() + 1);
+    public void generateGraphChart() {
+        Dictionary<string, float> mapToFloatX = new Dictionary<string, float>();
+        Dictionary<string, float> mapToFloatY = new Dictionary<string, float>();
+        Dictionary<string, float> mapToFloatZ = new Dictionary<string, float>();
+
+        List<GameObject> points = new List<GameObject>();
+
+        foreach (MultidimensionalObject obj in data.getData()) {
+            float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(mapToFloatX, (string) obj.getX());
+            float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(mapToFloatY, (string) obj.getY());
+            float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(mapToFloatZ, (string )obj.getZ());
+
+
+            float posX = length.x / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX()) + 1) * (x - ListUtils.getLowestFloat(data.getAllX()) + 1);
+            float posY = length.y / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY()) + 1) * (y - ListUtils.getLowestFloat(data.getAllY()) + 1);
+            float posZ = length.z / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ()) + 1) * (z - ListUtils.getLowestFloat(data.getAllZ()) + 1);
+            Debug.Log("lenght" + length.z);
+            Debug.Log("highest" + ListUtils.getHighestFloat(data.getAllZ()));
+            Debug.Log("lowest" + ListUtils.getLowestFloat(data.getAllZ()) + 1);
 
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.position = new Vector3(posX,posY,posZ);
             temp.transform.localScale = new Vector3(100, 100, 100);
             PointScript script = temp.AddComponent<PointScript>();
-            script.showX = x;
-            script.showY = y;
-            script.showZ = z;
+            script.showX = obj.getX().ToString();
+            script.showY = obj.getY().ToString();
+            script.showZ = obj.getZ().ToString();
             script.titleX = data.getHeadlines()[0];
             script.titleY = data.getHeadlines()[1];
             script.titleZ = data.getHeadlines()[2];
@@ -47,65 +66,12 @@ public class DataController {
             lr.SetWidth(25, 25);
         }
     }
-
-    private float getUpperEndX() {
-        float high = 0f;
-        foreach (MultidimensionalObject o in data.getData()) {
-            
-            if ((float)o.getX() > high) high = (float)o.getX();
-        }
-        return high;
-    }
-
-    private float getLowerEndX() {
-        float low = 999999f;
-        foreach (MultidimensionalObject o in data.getData()) {
-
-            if ((float)o.getX() < low) low = (float)o.getX();
-        }
-        return low;
-    }
-
-    private float getUpperEndY() {
-        float high = 0f;
-        foreach (MultidimensionalObject o in data.getData()) {
-
-            if ((float)o.getY() > high) high = (float)o.getY();
-        }
-        return high;
-    }
-
-    private float getLowerEndY() {
-        float low = 999999f;
-        foreach (MultidimensionalObject o in data.getData()) {
-
-            if ((float)o.getY() < low) low = (float)o.getY();
-        }
-        return low;
-    }
-
-    private float getUpperEndZ() {
-        float high = 0f;
-        foreach (MultidimensionalObject o in data.getData()) {
-            if ((float)o.getZ() > high) high = (float)o.getZ();
-        }
-        return high;
-    }
-
-    private float getLowerEndZ() {
-        float low = 999999f;
-        foreach (MultidimensionalObject o in data.getData()) {
-
-            if ((float)o.getZ() < low) low = (float)o.getZ();
-        }
-        return low;
-    }
 }
 
 public class PointScript : MonoBehaviour {
-    public float showX;
-    public float showY;
-    public float showZ;
+    public string showX;
+    public string showY;
+    public string showZ;
     public string titleX;
     public string titleY;
     public string titleZ;
