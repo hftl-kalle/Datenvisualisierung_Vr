@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEngine.UI;
 
 public class DataController {
 
     private CSVDataObject data;
     private Vector3 origin = new Vector3(0.0f,25.0f,0.0f);
-    private Vector3 length = new Vector3(5000f,1500f,2500f);
+    private Vector3 length = new Vector3(2,2,2);
 
     public DataController(CSVDataObject csvData) {
         this.data = csvData;
@@ -28,6 +29,8 @@ public class DataController {
         Dictionary<string, float> mapToFloatX = new Dictionary<string, float>();
         Dictionary<string, float> mapToFloatY = new Dictionary<string, float>();
         Dictionary<string, float> mapToFloatZ = new Dictionary<string, float>();
+        GameObject chartParent = new GameObject();
+        chartParent.name = "chartParent";
 
         List<GameObject> points = new List<GameObject>();
 
@@ -45,8 +48,12 @@ public class DataController {
             Debug.Log("lowest" + ListUtils.getLowestFloat(data.getAllZ()) + 1);
 
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            temp.transform.parent = chartParent.transform;
             temp.transform.position = new Vector3(posX,posY,posZ);
-            temp.transform.localScale = new Vector3(100, 100, 100);
+            temp.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            temp.tag = "pointInCloud";
+            Rigidbody rb = temp.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
             PointScript script = temp.AddComponent<PointScript>();
             script.showX = obj.getX().ToString();
             script.showY = obj.getY().ToString();
@@ -63,7 +70,7 @@ public class DataController {
             LineRenderer lr = o2.AddComponent<LineRenderer>();
             lr.SetPosition(0, o1.transform.position );
             lr.SetPosition(1, o2.transform.position);
-            lr.SetWidth(25, 25);
+            lr.SetWidth(0.05f, 0.05f);
         }
     }
 }
@@ -77,7 +84,7 @@ public class PointScript : MonoBehaviour {
     public string titleZ;
     private bool active = false;
 
-    void OnMouseDown() {
+    public void OnMouseDown() {
         toggleTextRenderer();
     }
 
@@ -86,13 +93,23 @@ public class PointScript : MonoBehaviour {
             GameObject.Destroy(GameObject.Find(gameObject.GetInstanceID().ToString()));
             return;
         }
-        GameObject tem = new GameObject(gameObject.GetInstanceID().ToString());
-        tem.transform.position = gameObject.transform.position;
-        tem.transform.rotation = gameObject.transform.rotation;
-        MeshRenderer mr = tem.AddComponent<MeshRenderer>();
-        TextMesh tm = tem.AddComponent<TextMesh>();
-        tm.text = titleX + ": " + showX + "\n" + titleY + ": " + showY + "\n" + titleZ + ": " + showZ;
-        tm.fontSize = 50;
-        tm.characterSize = 12;
+        /* GameObject tem = new GameObject(gameObject.GetInstanceID().ToString());
+         tem.transform.position = gameObject.transform.position;
+         MeshRenderer mr = tem.AddComponent<MeshRenderer>();
+         TextMesh tm = tem.AddComponent<TextMesh>();
+         tm.text = titleX + ": " + showX + "\n" + titleY + ": " + showY + "\n" + titleZ + ": " + showZ;
+         tm.fontSize = 50;
+         tm.characterSize = 12;*/
+        GameObject Canvas = GameObject.Find("Canvas");
+        GameObject textGO = new GameObject(gameObject.GetInstanceID().ToString());
+        textGO.transform.parent = Canvas.transform;
+        textGO.AddComponent<RectTransform>();
+        Text textComponent = textGO.AddComponent<Text>();
+        textGO.transform.position = gameObject.transform.position-new Vector3(0.2f,0,0.2f);
+        textGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        textGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+        textComponent.text= titleX + ": " + showX + "\n" + titleY + ": " + showY + "\n" + titleZ + ": " + showZ;
+        textComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+        textComponent.fontSize = 20;
     }
 }
