@@ -14,6 +14,7 @@ public class DataController {
         this.data = csvData;
     }
 
+    //return value from map or insert it if not found
     private float safeGetValueFromMap(Dictionary<string,float> d,string s) {
         if (d.ContainsKey(s)) {
             Debug.Log("key: " + s + "\nvalue: " + d[s].ToString());
@@ -26,23 +27,30 @@ public class DataController {
     }
 
     public void generateGraphChart() {
-        Dictionary<string, float> mapToFloatX = new Dictionary<string, float>();
-        Dictionary<string, float> mapToFloatY = new Dictionary<string, float>();
-        Dictionary<string, float> mapToFloatZ = new Dictionary<string, float>();
+
+        //these maps are used to enumerate strings in the  lists
+        Dictionary<string, float> mapX = new Dictionary<string, float>();
+        Dictionary<string, float> mapY = new Dictionary<string, float>();
+        Dictionary<string, float> mapZ = new Dictionary<string, float>();
         GameObject chartParent = new GameObject();
         chartParent.name = "chartParent";
 
         List<GameObject> points = new List<GameObject>();
 
         foreach (MultidimensionalObject obj in data.getData()) {
-            float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(mapToFloatX, (string) obj.getX());
-            float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(mapToFloatY, (string) obj.getY());
-            float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(mapToFloatZ, (string )obj.getZ());
 
+            //Get values
+            float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(mapX, (string) obj.getX());
+            float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(mapY, (string) obj.getY());
+            float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(mapZ, (string )obj.getZ());
 
-            float posX = length.x / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX()) + 1) * (x - ListUtils.getLowestFloat(data.getAllX()) + 1);
-            float posY = length.y / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY()) + 1) * (y - ListUtils.getLowestFloat(data.getAllY()) + 1);
-            float posZ = length.z / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ()) + 1) * (z - ListUtils.getLowestFloat(data.getAllZ()) + 1);
+            //calc position length axis / (highest avai. value - lowest avai. value + 1) * (value - lowest avai. value +1) 
+            // 100 / (5-0+1) * (2.5 - 0 + 1) = 50
+            //problem: lowest number is always at origin even if pretty big
+            float posX = length.x / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX())) * (x - ListUtils.getLowestFloat(data.getAllX()));
+            float posY = length.y / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY())) * (y - ListUtils.getLowestFloat(data.getAllY()));
+            float posZ = length.z / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ())) * (z - ListUtils.getLowestFloat(data.getAllZ()));
+
             Debug.Log("lenght" + length.z);
             Debug.Log("highest" + ListUtils.getHighestFloat(data.getAllZ()));
             Debug.Log("lowest" + ListUtils.getLowestFloat(data.getAllZ()) + 1);
@@ -107,6 +115,7 @@ public class PointScript : MonoBehaviour {
         Text textComponent = textGO.AddComponent<Text>();
         textGO.transform.position = gameObject.transform.position-new Vector3(0.2f,0,0.2f);
         textGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        textGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 100);
         textGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
         textComponent.text= titleX + ": " + showX + "\n" + titleY + ": " + showY + "\n" + titleZ + ": " + showZ;
         textComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");

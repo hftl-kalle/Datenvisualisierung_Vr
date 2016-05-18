@@ -1,14 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public static class ListUtils {
 
+    //if too slow consider caching
     public static float getHighestFloat(List<object> list) {
-        float returnValue = 0;
+        
         if (list[0] is string) {
-            return list.Count;
+            return list.Distinct().Count();
         }
+
+        float returnValue = 0;
         if (list.Count > 0) returnValue = (float) list[0];
 
         foreach (object f in list) {
