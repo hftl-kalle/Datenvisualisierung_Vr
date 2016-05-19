@@ -50,8 +50,26 @@ class ClipboardScript : MonoBehaviour {
 
     public void OnMouseDown() {
         CSVDataObject csvData = CSVParser.loadCsv(file.FullName);
-        DataController dc = new DataController(csvData);
-        dc.generateGraphChart();
+        //create chart parent
+        GameObject chartParent = GameObject.Find("chartParent");
+        if (chartParent != null) {
+            DestroyImmediate(chartParent);
+            foreach (Transform child in GameObject.Find("Canvas").transform) {
+                GameObject.Destroy(child.gameObject);
+            }
+        }
+        chartParent = new GameObject("chartParent");
+
+        //attach data controller to chart parent and init it
+
+        DataController dc = chartParent.AddComponent<DataController>();
+        dc.init(csvData);
+
+        //creating graphs can be called with
+        // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createLineGraph();
+        //also possible .createHeatMap() // .createBiMap // .createMultiple2DGraphs
+        dc.createLineGraph();
+
         if (csvData == null) {
             EditorUtility.DisplayDialog("Error","Your csv seems to be invalid. Atleast x and y are required","Ok");
         }

@@ -4,38 +4,35 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
 
-public class DataController {
+public class DataController : MonoBehaviour {
 
     private CSVDataObject data;
     private Vector3 origin = new Vector3(0.0f,25.0f,0.0f);
     private Vector3 length = new Vector3(2,2,2);
+    private List<GameObject> points = new List<GameObject>();
 
-    public DataController(CSVDataObject csvData) {
+    public void init(CSVDataObject csvData) {
         this.data = csvData;
+        createPoints();
     }
 
     //return value from map or insert it if not found
     private float safeGetValueFromMap(Dictionary<string,float> d,string s) {
         if (d.ContainsKey(s)) {
-            Debug.Log("key: " + s + "\nvalue: " + d[s].ToString());
             return d[s];
         } else {
             d.Add(s, d.Keys.Count);
-            Debug.Log("key: " + s + "\nvalue: " + d[s]);
             return d[s];
         }
     }
 
-    public void generateGraphChart() {
+    public void createPoints() {
 
         //these maps are used to enumerate strings in the  lists
         Dictionary<string, float> mapX = new Dictionary<string, float>();
         Dictionary<string, float> mapY = new Dictionary<string, float>();
         Dictionary<string, float> mapZ = new Dictionary<string, float>();
-        GameObject chartParent = new GameObject();
-        chartParent.name = "chartParent";
-
-        List<GameObject> points = new List<GameObject>();
+        GameObject chartParent = GameObject.Find("chartParent");
 
         foreach (MultidimensionalObject obj in data.getData()) {
 
@@ -50,10 +47,6 @@ public class DataController {
             float posX = length.x / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX())) * (x - ListUtils.getLowestFloat(data.getAllX()));
             float posY = length.y / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY())) * (y - ListUtils.getLowestFloat(data.getAllY()));
             float posZ = length.z / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ())) * (z - ListUtils.getLowestFloat(data.getAllZ()));
-
-            Debug.Log("lenght" + length.z);
-            Debug.Log("highest" + ListUtils.getHighestFloat(data.getAllZ()));
-            Debug.Log("lowest" + ListUtils.getLowestFloat(data.getAllZ()) + 1);
 
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
@@ -71,15 +64,29 @@ public class DataController {
             script.titleZ = data.getHeadlines()[2];
             points.Add(temp);
         }
+    }
 
+    public void createLineGraph() {
         for (int i = 1; i < points.Count; i++) {
             GameObject o1 = points[i];
             GameObject o2 = points[i - 1];
             LineRenderer lr = o2.AddComponent<LineRenderer>();
-            lr.SetPosition(0, o1.transform.position );
+            lr.SetPosition(0, o1.transform.position);
             lr.SetPosition(1, o2.transform.position);
             lr.SetWidth(0.05f, 0.05f);
         }
+    }
+
+    public void createHeatMap() {
+
+    }
+
+    public void createBiMap() {
+
+    }
+
+    public void createMultiple2DGraphs() {
+
     }
 }
 
