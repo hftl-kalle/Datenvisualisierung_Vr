@@ -9,14 +9,16 @@ public class CSVDataObject {
     private string headlineX;
     private string headlineY;
     private string headlineZ;
+    private string headlineW;
     private string file;
 
-    public CSVDataObject(string file, List<MultidimensionalObject> data, string headX, string headY, string headZ) {
+    public CSVDataObject(string file, List<MultidimensionalObject> data, string headX, string headY, string headZ, string headW = null) {
         this.dataList = data;
         this.file = file;
         this.headlineX = headX;
         this.headlineY = headY;
         this.headlineZ = headZ;
+        this.headlineW = headW;
     }
 
     public List<MultidimensionalObject> getData() {
@@ -41,14 +43,14 @@ public class CSVDataObject {
         return objects;
     }
 
-    public List<object> getAllRange() {
+    public List<object> getAllW() {
         List<object> objects = new List<object>();
-        dataList.ForEach(x => objects.Add(x.getRange()));
+        dataList.ForEach(x => objects.Add(x.getW()));
         return objects;
     }
 
     public string[] getHeadlines() {
-        return new string[3] { this.headlineX, this.headlineY, this.headlineZ };
+        return new string[4] { this.headlineX, this.headlineY, this.headlineZ, this.headlineW };
     }
 
     public string toString() {

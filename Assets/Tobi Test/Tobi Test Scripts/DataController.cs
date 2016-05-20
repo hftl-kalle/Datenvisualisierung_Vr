@@ -56,12 +56,8 @@ public class DataController : MonoBehaviour {
             Rigidbody rb = temp.AddComponent<Rigidbody>();
             rb.isKinematic = true;
             PointScript script = temp.AddComponent<PointScript>();
-            script.showX = obj.getX().ToString();
-            script.showY = obj.getY().ToString();
-            script.showZ = obj.getZ().ToString();
-            script.titleX = data.getHeadlines()[0];
-            script.titleY = data.getHeadlines()[1];
-            script.titleZ = data.getHeadlines()[2];
+            script.headlines = data.getHeadlines();
+            script.data = obj.getObjectArray();
             points.Add(temp);
         }
     }
@@ -82,21 +78,30 @@ public class DataController : MonoBehaviour {
     }
 
     public void createBiMap() {
-
     }
 
     public void createMultiple2DGraphs() {
-
+        Dictionary<float, GameObject> zValues = new Dictionary<float, GameObject>();
+        for (int i = 1; i < points.Count; i++) {
+            GameObject point = points[i];
+            if (zValues.ContainsKey(point.transform.position.z)) {
+                GameObject pointOld = zValues[point.transform.position.z];
+                zValues.Remove(point.transform.position.z);
+                LineRenderer lr = pointOld.AddComponent<LineRenderer>();
+                lr.SetPosition(0, point.transform.position);
+                lr.SetPosition(1, pointOld.transform.position);
+                lr.SetWidth(0.05f, 0.05f);
+                zValues.Add(point.transform.position.z, point);
+            } else {
+                zValues.Add(point.transform.position.z, point);
+            }
+        }
     }
 }
 
 public class PointScript : MonoBehaviour {
-    public string showX;
-    public string showY;
-    public string showZ;
-    public string titleX;
-    public string titleY;
-    public string titleZ;
+    public string[] headlines = new string[4];
+    public object[] data = new object[4];
     private bool active = false;
 
     public void OnMouseDown() {
@@ -122,9 +127,11 @@ public class PointScript : MonoBehaviour {
         Text textComponent = textGO.AddComponent<Text>();
         textGO.transform.position = gameObject.transform.position-new Vector3(0.2f,0,0.2f);
         textGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
-        textGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 100);
+        textGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
         textGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-        textComponent.text= titleX + ": " + showX + "\n" + titleY + ": " + showY + "\n" + titleZ + ": " + showZ;
+        for (int i=0; i < headlines.Length; i++) {
+            if (headlines[i] != null && data[i] != null) textComponent.text = textComponent.text + Environment.NewLine + headlines[i] + ": " + data[i];
+        }
         textComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
         textComponent.fontSize = 20;
     }

@@ -7,13 +7,13 @@ public class MultidimensionalObject {
     private object x;
     private object y;
     private object z;
-    private object range;
+    private object w;
 
-    public MultidimensionalObject(object x, object y, object z = null, object range = null) {
+    public MultidimensionalObject(object x, object y, object z = null, object w = null) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.range = range;
+        this.w = w;
     }
 
     public object getX() {
@@ -28,8 +28,8 @@ public class MultidimensionalObject {
         return this.z;
     }
 
-    public object getRange() {
-        return this.range;
+    public object getW() {
+        return this.w;
     }
 
     public void setX(object x) {
@@ -42,27 +42,19 @@ public class MultidimensionalObject {
     public void setZ(object z) {
         this.z = z;
     }
-    public void setRange(object range) {
-        this.range = range;
+    public void setW(object w) {
+        this.w = w;
     }
     public object[] getObjectArray() {
-        return new object[4] { this.x, this.y, this.z, this.range };
+        return new object[4] { this.x, this.y, this.z, this.w };
     }
 
     public string toString() {
         StringBuilder sb = new StringBuilder();
         sb.Append("x: ").Append(this.x != null ? this.x.ToString() : "Null");
-        if (this.x is string) sb.Append("\n is string");
-        else sb.Append("\n is float");
         sb.Append("\ny: ").Append(this.y != null ? this.y.ToString() : "Null");
-        if (this.y is string) sb.Append("\n is string");
-        else sb.Append("\n is float");
         sb.Append("\nz: ").Append(this.z != null ? this.z.ToString() : "Null");
-        if (this.z is string) sb.Append("\n is string");
-        else sb.Append("\n is float");
-        sb.Append("\nrange: ").Append(this.range != null ? this.range.ToString() : "Null");
-        if (this.range is string) sb.Append("\n is string");
-        else sb.Append("\n is float");
+        sb.Append("\nw: ").Append(this.w != null ? this.w.ToString() : "Null");
         return sb.ToString();
     }
 }

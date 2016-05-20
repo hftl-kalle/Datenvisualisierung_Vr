@@ -1,7 +1,7 @@
-"Jahre";"Umsatz; in Millionen Euro";"Ort"
-"1995";1.0;50	
-"1996";1.1;60
-"1997";1.0;70
-"1998";1.8;60
-"1999";1.7;70
-"2000";1.5;60
+"Jahre";"Firma";"Ort";Umsatz
+"Produkt1";Firma1;Dresden;1000
+"Produkt2";Firma2;Sachsen;1000
+"Produkt2";Firma1;Leipzig;1000
+"Produkt3";Firma1;Leipzig;1000
+"Produkt4";Firma1;Leipzig;1000
+"Produkt5";Firma1;Leipzig;1000

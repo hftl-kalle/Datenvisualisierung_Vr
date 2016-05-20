@@ -60,7 +60,7 @@ public static class CSVParser {
             if (dataList.Exists(x => x.getZ() is string)) dataList.ForEach(x => x.setZ(x.getZ().ToString()));
 
             //create csv data object and return it
-            CSVDataObject obj = new CSVDataObject(file, dataList, (string) headlines.getX(), (string) headlines.getY(), (string) headlines.getZ());
+            CSVDataObject obj = new CSVDataObject(file, dataList, (string) headlines.getX(), (string) headlines.getY(), (string) headlines.getZ(), (string) headlines.getW());
             return obj;
         }
         return null;
