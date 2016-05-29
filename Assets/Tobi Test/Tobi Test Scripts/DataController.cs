@@ -3,21 +3,31 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
+using System.Linq;
 
 public class DataController : MonoBehaviour {
 
     private CSVDataObject data;
-    private Vector3 origin = new Vector3(0.0f,25.0f,0.0f);
-    private Vector3 length = new Vector3(2,2,2);
+    private Vector3 origin = new Vector3(0.0f, 0.0f, 0.0f);
+    private Vector3 length = new Vector3(2, 2, 2);
     private List<GameObject> points = new List<GameObject>();
+    enum HeatmapLayers : int { DarkBlue, LightBlue, Green, Yellow, Orange, Red };
+
+    Dictionary<HeatmapLayers, float> heatmapColorThreshold = new Dictionary<HeatmapLayers, float>() {
+        {HeatmapLayers.DarkBlue, 0.165f},
+        {HeatmapLayers.LightBlue, 0.33f},
+        {HeatmapLayers.Green, 0.495f},
+        {HeatmapLayers.Yellow, 0.66f},
+        {HeatmapLayers.Orange, 0.825f},
+        {HeatmapLayers.Red, 1f}
+    };
 
     public void init(CSVDataObject csvData) {
         this.data = csvData;
-        createPoints();
     }
 
     //return value from map or insert it if not found
-    private float safeGetValueFromMap(Dictionary<string,float> d,string s) {
+    private float safeGetValueFromMap(Dictionary<string, float> d, string s) {
         if (d.ContainsKey(s)) {
             return d[s];
         } else {
@@ -26,8 +36,9 @@ public class DataController : MonoBehaviour {
         }
     }
 
-    public void createPoints() {
-
+    public void createPoints(float heatmapHeightReference = -100) {
+        clearGraph();
+        //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
         Dictionary<string, float> mapX = new Dictionary<string, float>();
         Dictionary<string, float> mapY = new Dictionary<string, float>();
@@ -37,20 +48,29 @@ public class DataController : MonoBehaviour {
         foreach (MultidimensionalObject obj in data.getData()) {
 
             //Get values
-            float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(mapX, (string) obj.getX());
-            float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(mapY, (string) obj.getY());
-            float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(mapZ, (string )obj.getZ());
-
+            float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(mapX, (string)obj.getX());
+            float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(mapY, (string)obj.getY());
+            float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(mapZ, (string)obj.getZ());
+            Debug.Log(ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX()));
+            Debug.Log(ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY()));
+            Debug.Log(ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ()));
             //calc position length axis / (highest avai. value - lowest avai. value + 1) * (value - lowest avai. value +1) 
-            // 100 / (5-0+1) * (2.5 - 0 + 1) = 50
+            // 100 / (5-0) * (2.5 - 0) = 50
             //problem: lowest number is always at origin even if pretty big
             float posX = length.x / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX())) * (x - ListUtils.getLowestFloat(data.getAllX()));
-            float posY = length.y / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY())) * (y - ListUtils.getLowestFloat(data.getAllY()));
             float posZ = length.z / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ())) * (z - ListUtils.getLowestFloat(data.getAllZ()));
-
+            if (posX != posX) posX = length.x / 2;
+            if (posZ != posZ) posZ = length.z / 2;
+            float posY;
+            if (heatmapHeightReference != -100) {
+                posY = length.y / heatmapHeightReference * y;
+            } else {
+                posY = length.y / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY())) * (y - ListUtils.getLowestFloat(data.getAllY()));
+            }
+            
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
-            temp.transform.position = new Vector3(posX,posY,posZ);
+            temp.transform.position = new Vector3(posX, posY, posZ);
             temp.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
             temp.tag = "pointInCloud";
             Rigidbody rb = temp.AddComponent<Rigidbody>();
@@ -63,6 +83,7 @@ public class DataController : MonoBehaviour {
     }
 
     public void createLineGraph() {
+        createPoints();
         for (int i = 1; i < points.Count; i++) {
             GameObject o1 = points[i];
             GameObject o2 = points[i - 1];
@@ -74,13 +95,158 @@ public class DataController : MonoBehaviour {
     }
 
     public void createHeatMap() {
+        float heatmapHeightReference = ListUtils.getHighestFloat(data.getAllW());
+        createPoints(heatmapHeightReference);
+        float[,] htmap = new float[129, 129];
+           for (int x = 0; x < htmap.GetLength(0); x++) {
+               for (int z = 0; z < htmap.GetLength(1); z++) {
+                   htmap[z, x] = 0;
+               }
+           }
 
+        //create terrain
+        GameObject terrainObj = new GameObject("TerrainObj");
+        TerrainData terrainData = new TerrainData();
+        //set terrain size
+        terrainData.size = new Vector3(0.5f,2f,0.5f);
+        //influences terrain size why so ever
+        terrainData.heightmapResolution = 128;
+        terrainData.baseMapResolution = 128;
+        //dunno if we need this,  can cause lags if to high values
+        terrainData.SetDetailResolution(64, 32);
+
+        //terrainData.SetHeights(0, 0, htmap);
+
+        int _heightmapWidth = htmap.GetUpperBound(0);
+        int _heightmapHeight = htmap.GetUpperBound(0);
+
+        TerrainCollider terrainCollider = terrainObj.AddComponent<TerrainCollider>();
+        Terrain terrain = terrainObj.AddComponent<Terrain>();
+        terrainCollider.terrainData = terrainData;
+        terrain.terrainData = terrainData;
+        terrainObj.transform.position = origin;
+   
+        Texture2D[] terrainTextures = new Texture2D[6];
+        for (int o = 0; o < terrainTextures.Length; o++) {
+            terrainTextures[o] = (Texture2D)Resources.Load("Textures/layer" + o);
+        }
+
+        SplatPrototype[] tex = new SplatPrototype[terrainTextures.Length];
+        for (int i = 0; i < terrainTextures.Length; i++) {
+            tex[i] = new SplatPrototype();
+            tex[i].texture = terrainTextures[i];    //Sets the texture
+            tex[i].tileSize = new Vector2(1, 1);    //Sets the size of the texture
+        }
+        terrainData.splatPrototypes = tex;
+        terrainData.alphamapResolution = 128;
+
+
+        float[,,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
+
+        for (int x = 0; x < splatmapData.GetLength(0); x++) {
+            for (int z = 0; z < splatmapData.GetLength(1); z++) {
+                splatmapData[z, x, 0] = 1f;
+            }
+        }
+
+        /* smooth the heatmap raises */
+        for (int k = 0; k < points.Count; k++) {
+            //points[k].SetActive(false);
+            if (points[k].transform.position.y > 0) {
+
+                //best use multiple of 6
+                int range = 12;
+                float percentage = (float)Math.Round(1.0 / (range + 1), 2);
+                int x1 =  (int)((points[k].transform.position.x / terrain.terrainData.size.x) * _heightmapWidth);
+                int z1 = (int)((points[k].transform.position.z / terrain.terrainData.size.z) * _heightmapHeight);
+                float pointHeigth = points[k].transform.position.y / length.y;
+                htmap[z1, x1] = pointHeigth;
+
+                range++;
+                for (int rx = -range; rx <= range; rx++) {
+                    for (int rz = -range; rz <= range; rz++) {
+                        //wenn wert +- den range wert immer noch im gültigen bereich
+                        if ((x1 + rx > -1) && (z1 + rz > -1) && (x1 + rx <= _heightmapHeight) && (z1 + rz <= _heightmapWidth)) {
+                            for (int ix = range; ix >= 0; ix--) {
+                                if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {
+                                    if (htmap[z1 + rz, x1 + rx] == 0) {
+                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / length.y;
+                                        float[] splatWeights = new float[terrainData.alphamapLayers];
+                                        if (heigth > heatmapColorThreshold[HeatmapLayers.Orange]) {
+                                            splatWeights[5] = 1f;
+                                        } else if (heigth > heatmapColorThreshold[HeatmapLayers.Yellow]) {
+                                            splatWeights[4] = 1f;
+                                        } else if (heigth > heatmapColorThreshold[HeatmapLayers.Green]) {
+                                            splatWeights[3] = 1f;
+                                        } else if (heigth > heatmapColorThreshold[HeatmapLayers.LightBlue]) {
+                                            splatWeights[2] = 1f;
+                                        } else if (heigth > heatmapColorThreshold[HeatmapLayers.DarkBlue]) {
+                                            splatWeights[1] = 1f;
+                                        } else {
+                                            splatWeights[0] = 1f;
+                                        }
+                                        float z = splatWeights.Sum();
+                                        for (int i = 0; i < terrainData.alphamapLayers; i++) {
+                                            splatWeights[i] /= z;
+                                            if ( (z1 + rz - 1 > -1) && (x1 + rx - 1 > -1)) splatmapData[z1 + rz-1, x1 + rx-1, i] = splatWeights[i];
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                range--;
+                //iterate from - range  to + range
+                for (int rx = -range; rx <= range; rx++) {                  
+                    for (int rz = -range; rz <= range; rz++) {
+                        //wenn wert +- den range wert immer noch im gültigen bereich
+                        if ((x1 + rx > -1) && (z1 + rz > -1) && (x1 + rx <= _heightmapHeight) && (z1 + rz <= _heightmapWidth)) {
+                            for (int ix = range; ix >= 0; ix--) {
+                                if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {                    
+                                    if (htmap[z1 + rz, x1 + rx] == 0) {
+                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / length.y;
+                                        foreach (HeatmapLayers layer in Enum.GetValues(typeof(HeatmapLayers))) {
+                                            if (heigth <= heatmapColorThreshold[layer]) {
+                                                if (heatmapColorThreshold[layer] > pointHeigth) {
+                                                    htmap[z1 + rz, x1 + rx] = heigth;
+                                                    break;
+                                                }
+                                                htmap[z1 + rz, x1 + rx] = heatmapColorThreshold[layer];
+                                                break;
+                                            }
+                                        }                               
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            terrain.terrainData.SetHeights(0, 0, htmap);
+            terrainData.SetAlphamaps(0, 0, splatmapData);
+        }
+    }
+
+    public void clearGraph() {
+        foreach (GameObject point in points) {
+            GameObject.DestroyImmediate(point);
+        }
+        GameObject.DestroyImmediate(GameObject.Find("TerrainObj"));
     }
 
     public void createBiMap() {
+        createPoints();
+        for (int i = 1; i < points.Count; i++) {
+            PointScript script = points[i].GetComponent<PointScript>();
+            script.showAdditionalData = true;
+        }
+            
     }
 
     public void createMultiple2DGraphs() {
+        createPoints();
         Dictionary<float, GameObject> zValues = new Dictionary<float, GameObject>();
         for (int i = 1; i < points.Count; i++) {
             GameObject point = points[i];
@@ -103,6 +269,7 @@ public class PointScript : MonoBehaviour {
     public string[] headlines = new string[4];
     public object[] data = new object[4];
     private bool active = false;
+    public bool showAdditionalData = false;
 
     public void OnMouseDown() {
         toggleTextRenderer();
@@ -129,7 +296,8 @@ public class PointScript : MonoBehaviour {
         textGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
         textGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
         textGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-        for (int i=0; i < headlines.Length; i++) {
+        
+        for (int i=0; i < ( (showAdditionalData) ? headlines.Length : (headlines.Length-1)); i++) {
             if (headlines[i] != null && data[i] != null) textComponent.text = textComponent.text + Environment.NewLine + headlines[i] + ": " + data[i];
         }
         textComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");

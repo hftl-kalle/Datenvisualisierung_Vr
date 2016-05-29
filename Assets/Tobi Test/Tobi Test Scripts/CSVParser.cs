@@ -37,13 +37,13 @@ public static class CSVParser {
                 for (int i = 0; i < lines[l].Split(';').Length; i++) {
                     if (i >= 4) break;
                     float f;
-                    if (Regex.IsMatch(lines[l].Split(';')[i],regex)) {
+                    if (Regex.IsMatch(lines[l].Split(';')[i], regex)) {
 
-                        temp[i] = lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";").Replace("\"","");
+                        temp[i] = lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";").Replace("\"", "");
                         continue;
                     }
-                    if (float.TryParse(lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";"), out f))
-                        temp[i] = f;
+                    if (float.TryParse(lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";"), out f)) { 
+                    temp[i] = f; }
                     else
                         temp[i] = lines[l].Split(';')[i].Replace(SEMICOLON_SANATIZER, ";");
                 }

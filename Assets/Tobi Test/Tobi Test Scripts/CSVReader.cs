@@ -68,7 +68,7 @@ class ClipboardScript : MonoBehaviour {
         //creating graphs can be called with
         // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createLineGraph();
         //also possible .createHeatMap() // .createBiMap // .createMultiple2DGraphs
-        dc.createMultiple2DGraphs();
+        dc.createHeatMap();
 
         if (csvData == null) {
             EditorUtility.DisplayDialog("Error","Your csv seems to be invalid. Atleast x and y are required","Ok");

@@ -9,14 +9,19 @@ public static class ListUtils {
     public static float getHighestFloat(List<object> list) {
         
         if (list[0] is string) {
-            return list.Distinct().Count();
+            return list.Distinct().Count() - 1;
         }
 
         float returnValue = 0;
         if (list.Count > 0) returnValue = (float) list[0];
 
         foreach (object f in list) {
-            if ((float)f > returnValue) returnValue = (float)f;
+            try {
+                if ((float)f > returnValue) returnValue = (float)f;
+            } catch (System.InvalidCastException e) {
+                Debug.Log(e + " . " + returnValue.GetType());
+            }
+            
         }
         return returnValue;
     }
