@@ -58,8 +58,9 @@ class ClipboardScript : MonoBehaviour {
                 GameObject.Destroy(child.gameObject);
             }
         }
-        chartParent = new GameObject("chartParent");
+        // create chart parent with axis
 
+        chartParent = new GameObject("chartParent");
         //attach data controller to chart parent and init it
 
         DataController dc = chartParent.AddComponent<DataController>();
@@ -68,7 +69,7 @@ class ClipboardScript : MonoBehaviour {
         //creating graphs can be called with
         // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createLineGraph();
         //also possible .createHeatMap() // .createBiMap // .createMultiple2DGraphs
-        dc.createHeatMap();
+        dc.createMultiple2DGraphs();
 
         if (csvData == null) {
             EditorUtility.DisplayDialog("Error","Your csv seems to be invalid. Atleast x and y are required","Ok");

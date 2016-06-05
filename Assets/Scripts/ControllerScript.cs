@@ -7,6 +7,11 @@ public class ControllerScript : MonoBehaviour
     public GameObject currentCollisionObject;
     public Rigidbody attachPoint;
     public Vector3 currentCollisionPoint;
+    Transform attachTransfrom = null;
+    Vector3 currPosition, lastPosition;
+    public float scaleValue=0.5f;
+    public float xyzscale = 2;
+
 
     SteamVR_TrackedObject trackedObj;
     FixedJoint joint;
@@ -14,6 +19,13 @@ public class ControllerScript : MonoBehaviour
     void Awake()
     {
         trackedObj = GetComponent<SteamVR_TrackedObject>();
+        lastPosition = transform.position;
+        currPosition = transform.position;
+    }
+
+    void Start()
+    {
+
     }
 
     void OnTriggerEnter(Collider coll)
@@ -34,7 +46,8 @@ public class ControllerScript : MonoBehaviour
     {
         try
         {
-            currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Standard");
+            if(currentCollisionObject.tag=="axis") currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Sprites/Default");
+            else currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Standard");
         }
         catch
         {
@@ -52,6 +65,25 @@ public class ControllerScript : MonoBehaviour
 
     void FixedUpdate()
     {
+        lastPosition = currPosition;
+        currPosition = transform.position;
+
+        if (!attachTransfrom)
+        {
+            try
+            {
+                attachTransfrom = transform.FindChild("Model").FindChild("tip").FindChild("attach");
+                Rigidbody rigidbody = attachTransfrom.gameObject.AddComponent<Rigidbody>();
+                rigidbody.isKinematic = true;
+                attachPoint = rigidbody;
+            }
+            catch
+            {
+                Debug.Log("did not find transform or something");
+            }
+
+        }
+
         var device = SteamVR_Controller.Input((int)trackedObj.index);
 
         // check if clipboard is attached and if the trackpad is pressed. if so create 
@@ -75,6 +107,34 @@ public class ControllerScript : MonoBehaviour
                 if(currentCollisionObject&& currentCollisionObject.tag == "pointInCloud")
                 {
                     currentCollisionObject.GetComponent<PointScript>().OnMouseDown();
+                }
+                else
+                {
+                    if (currentCollisionObject && currentCollisionObject.tag == "axis")
+                    {
+                        GameObject chartParent = GameObject.Find("chartParent");
+                        Vector3 heading = lastPosition - currPosition;
+                        heading = heading / heading.magnitude;
+                        //check which axis
+                        BoxCollider bc = currentCollisionObject.GetComponent<BoxCollider>();
+                        DataController dc = currentCollisionObject.GetComponent<DataController>();
+                        if (bc.size.x == 2)
+                        {                            
+                            dc.setScale (new Vector3(heading.x,0,0));
+                            //chartParent.transform.FindChild("TerrainObj").GetComponent<Terrain>().terrainData.size=new();
+                        }
+                        else
+                        {
+                            if (bc.size.y == 2)
+                            {
+                                dc.setScale (new Vector3(0,heading.y, 0));
+                            }
+                            else
+                            {
+                                dc.setScale (new Vector3(0,0, heading.z));
+                            }
+                        }
+                    }
                 }
             }
         }

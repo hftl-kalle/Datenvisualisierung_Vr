@@ -6,10 +6,18 @@ using UnityEngine.UI;
 using System.Linq;
 
 public class DataController : MonoBehaviour {
-
+    private enum CurrentRenderMode
+    {
+        LineGraph,
+        HeatMap,
+        BiMap,
+        Multiple
+    }
     private CSVDataObject data;
+    public Vector3 scale = new Vector3(1, 1, 1);
     private Vector3 origin = new Vector3(0.0f, 0.0f, 0.0f);
     private Vector3 length = new Vector3(2, 2, 2);
+    CurrentRenderMode RenderMode;
     private List<GameObject> points = new List<GameObject>();
     enum HeatmapLayers : int { DarkBlue, LightBlue, Green, Yellow, Orange, Red };
 
@@ -26,6 +34,39 @@ public class DataController : MonoBehaviour {
         this.data = csvData;
     }
 
+    public void init(CSVDataObject csvData, Vector3 scaleParam)
+    {
+        this.data = csvData;
+        scale = scaleParam;
+    }
+
+    public void setScale(Vector3 scaleParam)
+    {
+        scale += scaleParam;
+        reRender();
+    }
+
+    public void reRender()
+    {
+        switch (RenderMode)
+        {
+            case CurrentRenderMode.LineGraph:
+                createLineGraph();
+                break;
+            case CurrentRenderMode.HeatMap:
+                createHeatMap();
+                break;
+            case CurrentRenderMode.BiMap:
+                createBiMap();
+                break;
+            case CurrentRenderMode.Multiple:
+                createMultiple2DGraphs();
+                break;
+            default:
+                break;
+        }
+    }
+
     //return value from map or insert it if not found
     private float safeGetValueFromMap(Dictionary<string, float> d, string s) {
         if (d.ContainsKey(s)) {
@@ -38,6 +79,7 @@ public class DataController : MonoBehaviour {
 
     public void createPoints(float heatmapHeightReference = -100) {
         clearGraph();
+        createAxis();
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
         Dictionary<string, float> mapX = new Dictionary<string, float>();
@@ -57,21 +99,21 @@ public class DataController : MonoBehaviour {
             //calc position length axis / (highest avai. value - lowest avai. value + 1) * (value - lowest avai. value +1) 
             // 100 / (5-0) * (2.5 - 0) = 50
             //problem: lowest number is always at origin even if pretty big
-            float posX = length.x / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX())) * (x - ListUtils.getLowestFloat(data.getAllX()));
-            float posZ = length.z / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ())) * (z - ListUtils.getLowestFloat(data.getAllZ()));
-            if (posX != posX) posX = length.x / 2;
-            if (posZ != posZ) posZ = length.z / 2;
+            float posX = (length.x*scale.x) / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX())) * (x - ListUtils.getLowestFloat(data.getAllX()));
+            float posZ = (length.z * scale.z) / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ())) * (z - ListUtils.getLowestFloat(data.getAllZ()));
+            if (posX != posX) posX = (length.x * scale.x) / 2;
+            if (posZ != posZ) posZ = (length.z * scale.z) / 2;
             float posY;
             if (heatmapHeightReference != -100) {
-                posY = length.y / heatmapHeightReference * y;
+                posY = (length.y * scale.y) / heatmapHeightReference * y;
             } else {
-                posY = length.y / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY())) * (y - ListUtils.getLowestFloat(data.getAllY()));
+                posY = (length.y * scale.y) / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY())) * (y - ListUtils.getLowestFloat(data.getAllY()));
             }
             
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
             temp.transform.position = new Vector3(posX, posY, posZ);
-            temp.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            temp.transform.localScale = new Vector3(0.05f*length.x * scale.x, 0.05f*length.y * scale.y, 0.05f*length.z * scale.z);
             temp.tag = "pointInCloud";
             Rigidbody rb = temp.AddComponent<Rigidbody>();
             rb.isKinematic = true;
@@ -83,7 +125,7 @@ public class DataController : MonoBehaviour {
     }
 
     public void createLineGraph() {
-        createPoints();
+        RenderMode = CurrentRenderMode.LineGraph;
         for (int i = 1; i < points.Count; i++) {
             GameObject o1 = points[i];
             GameObject o2 = points[i - 1];
@@ -95,6 +137,7 @@ public class DataController : MonoBehaviour {
     }
 
     public void createHeatMap() {
+        RenderMode = CurrentRenderMode.HeatMap;
         float heatmapHeightReference = ListUtils.getHighestFloat(data.getAllW());
         createPoints(heatmapHeightReference);
         float[,] htmap = new float[129, 129];
@@ -106,9 +149,10 @@ public class DataController : MonoBehaviour {
 
         //create terrain
         GameObject terrainObj = new GameObject("TerrainObj");
+        terrainObj.transform.parent = GameObject.Find("chartParent").transform;
         TerrainData terrainData = new TerrainData();
         //set terrain size
-        terrainData.size = new Vector3(0.5f,2f,0.5f);
+        terrainData.size = new Vector3(0.25f*length.x * scale.x, 1f*length.y * scale.y, 0.25f*length.z * scale.z);
         //influences terrain size why so ever
         terrainData.heightmapResolution = 128;
         terrainData.baseMapResolution = 128;
@@ -159,7 +203,7 @@ public class DataController : MonoBehaviour {
                 float percentage = (float)Math.Round(1.0 / (range + 1), 2);
                 int x1 =  (int)((points[k].transform.position.x / terrain.terrainData.size.x) * _heightmapWidth);
                 int z1 = (int)((points[k].transform.position.z / terrain.terrainData.size.z) * _heightmapHeight);
-                float pointHeigth = points[k].transform.position.y / length.y;
+                float pointHeigth = points[k].transform.position.y / (length.y * scale.y);
                 htmap[z1, x1] = pointHeigth;
 
                 range++;
@@ -170,7 +214,7 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
-                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / length.y;
+                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (length.y * scale.y);
                                         float[] splatWeights = new float[terrainData.alphamapLayers];
                                         if (heigth > heatmapColorThreshold[HeatmapLayers.Orange]) {
                                             splatWeights[5] = 1f;
@@ -206,7 +250,7 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {                    
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
-                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / length.y;
+                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (length.y * scale.y);
                                         foreach (HeatmapLayers layer in Enum.GetValues(typeof(HeatmapLayers))) {
                                             if (heigth <= heatmapColorThreshold[layer]) {
                                                 if (heatmapColorThreshold[layer] > pointHeigth) {
@@ -234,9 +278,13 @@ public class DataController : MonoBehaviour {
             GameObject.DestroyImmediate(point);
         }
         GameObject.DestroyImmediate(GameObject.Find("TerrainObj"));
+        GameObject.DestroyImmediate(GameObject.Find("Xaxis"));
+        GameObject.DestroyImmediate(GameObject.Find("Yaxis"));
+        GameObject.DestroyImmediate(GameObject.Find("Zaxis"));
     }
 
     public void createBiMap() {
+        RenderMode= CurrentRenderMode.BiMap;
         createPoints();
         for (int i = 1; i < points.Count; i++) {
             PointScript script = points[i].GetComponent<PointScript>();
@@ -246,6 +294,7 @@ public class DataController : MonoBehaviour {
     }
 
     public void createMultiple2DGraphs() {
+        RenderMode = CurrentRenderMode.Multiple;
         createPoints();
         Dictionary<float, GameObject> zValues = new Dictionary<float, GameObject>();
         for (int i = 1; i < points.Count; i++) {
@@ -256,12 +305,65 @@ public class DataController : MonoBehaviour {
                 LineRenderer lr = pointOld.AddComponent<LineRenderer>();
                 lr.SetPosition(0, point.transform.position);
                 lr.SetPosition(1, pointOld.transform.position);
-                lr.SetWidth(0.05f, 0.05f);
+                lr.SetWidth(0.029f * scale.magnitude, 0.029f * scale.magnitude);
                 zValues.Add(point.transform.position.z, point);
             } else {
                 zValues.Add(point.transform.position.z, point);
             }
         }
+    }
+
+    public void createAxis()
+    {
+        GameObject chartParent = GameObject.Find("chartParent");
+        GameObject xaxis = new GameObject("Xaxis");
+        Rigidbody xrb = xaxis.AddComponent<Rigidbody>();
+        xrb.isKinematic = true;
+        xaxis.transform.parent = chartParent.transform;
+        xaxis.tag = "axis";
+        BoxCollider xbc = xaxis.AddComponent<BoxCollider>();
+        xbc.center = new Vector3(1, 1, 1);
+        xbc.size = new Vector3(2, 0.05f, 0.05f);
+
+        GameObject yaxis = new GameObject("Yaxis");
+        Rigidbody yrb = yaxis.AddComponent<Rigidbody>();
+        yrb.isKinematic = true;
+        yaxis.transform.parent = chartParent.transform;
+        yaxis.tag = "axis";
+        BoxCollider ybc = yaxis.AddComponent<BoxCollider>();
+        ybc.center = new Vector3(1, 1, 1);
+        ybc.size = new Vector3(0.05f, 2, 0.05f);
+
+        GameObject zaxis = new GameObject("Zaxis");
+        Rigidbody zrb = zaxis.AddComponent<Rigidbody>();
+        zrb.isKinematic = true;
+        zaxis.transform.parent = chartParent.transform;
+        zaxis.tag = "axis";
+        BoxCollider zbc = zaxis.AddComponent<BoxCollider>();
+        zbc.center = new Vector3(1, 1, 1);
+        zbc.size = new Vector3(0.05f, 0.05f, 2);
+
+        LineRenderer lrx = xaxis.AddComponent<LineRenderer>();
+        lrx.material = new Material(Shader.Find("Sprites/Default"));
+        lrx.SetWidth(0.05f, 0.05f);
+        lrx.SetColors(Color.blue, Color.blue);
+        lrx.SetPosition(0, new Vector3(2, 1, 1));
+        lrx.SetPosition(1, new Vector3(0, 1, 1));
+        lrx.useWorldSpace = false;
+        LineRenderer lry = yaxis.AddComponent<LineRenderer>();
+        lry.material = new Material(Shader.Find("Sprites/Default"));
+        lry.SetWidth(0.05f, 0.05f);
+        lry.SetColors(Color.blue, Color.blue);
+        lry.SetPosition(0, new Vector3(1, 2, 1));
+        lry.SetPosition(1, new Vector3(1, 0, 1));
+        lry.useWorldSpace = false;
+        LineRenderer lrz = zaxis.AddComponent<LineRenderer>();
+        lrz.material = new Material(Shader.Find("Sprites/Default"));
+        lrz.SetWidth(0.05f, 0.05f);
+        lrz.SetColors(Color.blue, Color.blue);
+        lrz.SetPosition(0, new Vector3(1, 1, 2));
+        lrz.SetPosition(1, new Vector3(1, 1, 0));
+        lrz.useWorldSpace = false;
     }
 }
 
