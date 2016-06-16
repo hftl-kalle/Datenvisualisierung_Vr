@@ -81,8 +81,10 @@ public class DataController : MonoBehaviour {
     }
 
     public void createPoints(float heatmapHeightReference = 0) {
+        if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
+        else createAxis();
         clearGraph();
-        createAxis();
+
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
         Dictionary<string, float> stringValsX = new Dictionary<string, float>();
@@ -102,8 +104,6 @@ public class DataController : MonoBehaviour {
             print(posX);
             float scaleZ = quadrantSize.z / ListUtils.getMaxAbsolutAmount(data.getAllZ());
             float posZ = z * scaleZ * (-1);
-
-            if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
 
             float scaleY = heatmapHeightReference / ListUtils.getMaxAbsolutAmount(data.getAllY());
             float posY = y * scaleY;
@@ -136,7 +136,8 @@ public class DataController : MonoBehaviour {
 
     public void createHeatMap() {
         RenderMode = CurrentRenderMode.HeatMap;
-        float heatmapHeightReference = ListUtils.getHighestFloat(data.getAllW());
+        //float heatmapHeightReference = ListUtils.getHighestFloat(data.getAllW());
+        float heatmapHeightReference = 0;
         createPoints(heatmapHeightReference);
         float[,] htmap = new float[129, 129];
            for (int x = 0; x < htmap.GetLength(0); x++) {
@@ -148,6 +149,7 @@ public class DataController : MonoBehaviour {
         //create terrain
         GameObject terrainObj = new GameObject("TerrainObj");
         terrainObj.transform.parent = GameObject.Find("chartParent").transform;
+        terrainObj.transform.localPosition = -quadrantSize;
         TerrainData terrainData = new TerrainData();
         //set terrain size
         terrainData.size = new Vector3(0.25f*overallSize.x * scale.x, 1f*overallSize.y * scale.y, 0.25f*overallSize.z * scale.z);
@@ -166,7 +168,6 @@ public class DataController : MonoBehaviour {
         Terrain terrain = terrainObj.AddComponent<Terrain>();
         terrainCollider.terrainData = terrainData;
         terrain.terrainData = terrainData;
-        terrainObj.transform.position = origin;
    
         Texture2D[] terrainTextures = new Texture2D[6];
         for (int o = 0; o < terrainTextures.Length; o++) {
