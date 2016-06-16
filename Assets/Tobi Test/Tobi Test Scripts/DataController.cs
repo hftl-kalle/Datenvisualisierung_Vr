@@ -6,8 +6,8 @@ using UnityEngine.UI;
 using System.Linq;
 
 public class DataController : MonoBehaviour {
-    private enum CurrentRenderMode
-    {
+
+    private enum CurrentRenderMode {
         LineGraph,
         HeatMap,
         BiMap,
@@ -15,8 +15,11 @@ public class DataController : MonoBehaviour {
     }
     private CSVDataObject data;
     public Vector3 scale = new Vector3(1, 1, 1);
-    private Vector3 origin = new Vector3(0.0f, 0.0f, 0.0f);
-    private Vector3 length = new Vector3(2, 2, 2);
+    private Vector3 origin = new Vector3(1, 1, 1);
+
+    private static Vector3 overallSize = new Vector3(2, 2, 2);
+    private static Vector3 quadrantSize = overallSize / 2;
+
     CurrentRenderMode RenderMode;
     private List<GameObject> points = new List<GameObject>();
     enum HeatmapLayers : int { DarkBlue, LightBlue, Green, Yellow, Orange, Red };
@@ -32,11 +35,11 @@ public class DataController : MonoBehaviour {
 
     public void init(CSVDataObject csvData) {
         this.data = csvData;
+        GameObject.Find("chartParent").transform.localPosition = origin;
     }
 
-    public void init(CSVDataObject csvData, Vector3 scaleParam)
-    {
-        this.data = csvData;
+    public void init(CSVDataObject csvData, Vector3 scaleParam) {
+        init(csvData);
         scale = scaleParam;
     }
 
@@ -77,43 +80,38 @@ public class DataController : MonoBehaviour {
         }
     }
 
-    public void createPoints(float heatmapHeightReference = -100) {
+    public void createPoints(float heatmapHeightReference = 0) {
         clearGraph();
         createAxis();
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
-        Dictionary<string, float> mapX = new Dictionary<string, float>();
-        Dictionary<string, float> mapY = new Dictionary<string, float>();
-        Dictionary<string, float> mapZ = new Dictionary<string, float>();
+        Dictionary<string, float> stringValsX = new Dictionary<string, float>();
+        Dictionary<string, float> stringValsY = new Dictionary<string, float>();
+        Dictionary<string, float> stringValsZ = new Dictionary<string, float>();
         GameObject chartParent = GameObject.Find("chartParent");
 
         foreach (MultidimensionalObject obj in data.getData()) {
 
             //Get values
-            float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(mapX, (string)obj.getX());
-            float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(mapY, (string)obj.getY());
-            float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(mapZ, (string)obj.getZ());
-            Debug.Log(ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX()));
-            Debug.Log(ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY()));
-            Debug.Log(ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ()));
-            //calc position length axis / (highest avai. value - lowest avai. value + 1) * (value - lowest avai. value +1) 
-            // 100 / (5-0) * (2.5 - 0) = 50
-            //problem: lowest number is always at origin even if pretty big
-            float posX = (length.x*scale.x) / (ListUtils.getHighestFloat(data.getAllX()) - ListUtils.getLowestFloat(data.getAllX())) * (x - ListUtils.getLowestFloat(data.getAllX()));
-            float posZ = (length.z * scale.z) / (ListUtils.getHighestFloat(data.getAllZ()) - ListUtils.getLowestFloat(data.getAllZ())) * (z - ListUtils.getLowestFloat(data.getAllZ()));
-            if (posX != posX) posX = (length.x * scale.x) / 2;
-            if (posZ != posZ) posZ = (length.z * scale.z) / 2;
-            float posY;
-            if (heatmapHeightReference != -100) {
-                posY = (length.y * scale.y) / heatmapHeightReference * y;
-            } else {
-                posY = (length.y * scale.y) / (ListUtils.getHighestFloat(data.getAllY()) - ListUtils.getLowestFloat(data.getAllY())) * (y - ListUtils.getLowestFloat(data.getAllY()));
-            }
-            
+            float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(stringValsX, (string)obj.getX());
+            float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(stringValsY, (string)obj.getY());
+            float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(stringValsZ, (string)obj.getZ());
+
+            float scaleX = quadrantSize.x / ListUtils.getMaxAbsolutAmount(data.getAllX());
+            float posX = x * scaleX;
+            print(posX);
+            float scaleZ = quadrantSize.z / ListUtils.getMaxAbsolutAmount(data.getAllZ());
+            float posZ = z * scaleZ * (-1);
+
+            if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
+
+            float scaleY = heatmapHeightReference / ListUtils.getMaxAbsolutAmount(data.getAllY());
+            float posY = y * scaleY;
+
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
-            temp.transform.position = new Vector3(posX, posY, posZ);
-            temp.transform.localScale = new Vector3(0.05f*length.x * scale.x, 0.05f*length.y * scale.y, 0.05f*length.z * scale.z);
+            temp.transform.localPosition = new Vector3(posX, posY, posZ);
+            temp.transform.localScale = new Vector3(0.05f*overallSize.x * scale.x, 0.05f*overallSize.y * scale.y, 0.05f*overallSize.z * scale.z);
             temp.tag = "pointInCloud";
             Rigidbody rb = temp.AddComponent<Rigidbody>();
             rb.isKinematic = true;
@@ -152,7 +150,7 @@ public class DataController : MonoBehaviour {
         terrainObj.transform.parent = GameObject.Find("chartParent").transform;
         TerrainData terrainData = new TerrainData();
         //set terrain size
-        terrainData.size = new Vector3(0.25f*length.x * scale.x, 1f*length.y * scale.y, 0.25f*length.z * scale.z);
+        terrainData.size = new Vector3(0.25f*overallSize.x * scale.x, 1f*overallSize.y * scale.y, 0.25f*overallSize.z * scale.z);
         //influences terrain size why so ever
         terrainData.heightmapResolution = 128;
         terrainData.baseMapResolution = 128;
@@ -203,7 +201,7 @@ public class DataController : MonoBehaviour {
                 float percentage = (float)Math.Round(1.0 / (range + 1), 2);
                 int x1 =  (int)((points[k].transform.position.x / terrain.terrainData.size.x) * _heightmapWidth);
                 int z1 = (int)((points[k].transform.position.z / terrain.terrainData.size.z) * _heightmapHeight);
-                float pointHeigth = points[k].transform.position.y / (length.y * scale.y);
+                float pointHeigth = points[k].transform.position.y / (overallSize.y * scale.y);
                 htmap[z1, x1] = pointHeigth;
 
                 range++;
@@ -214,7 +212,7 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
-                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (length.y * scale.y);
+                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (overallSize.y * scale.y);
                                         float[] splatWeights = new float[terrainData.alphamapLayers];
                                         if (heigth > heatmapColorThreshold[HeatmapLayers.Orange]) {
                                             splatWeights[5] = 1f;
@@ -250,7 +248,7 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {                    
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
-                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (length.y * scale.y);
+                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (overallSize.y * scale.y);
                                         foreach (HeatmapLayers layer in Enum.GetValues(typeof(HeatmapLayers))) {
                                             if (heigth <= heatmapColorThreshold[layer]) {
                                                 if (heatmapColorThreshold[layer] > pointHeigth) {
@@ -364,45 +362,5 @@ public class DataController : MonoBehaviour {
         lrz.SetPosition(0, new Vector3(1, 1, 2));
         lrz.SetPosition(1, new Vector3(1, 1, 0));
         lrz.useWorldSpace = false;
-    }
-}
-
-public class PointScript : MonoBehaviour {
-    public string[] headlines = new string[4];
-    public object[] data = new object[4];
-    private bool active = false;
-    public bool showAdditionalData = false;
-
-    public void OnMouseDown() {
-        toggleTextRenderer();
-    }
-
-    private void toggleTextRenderer() {
-        if (GameObject.Find(gameObject.GetInstanceID().ToString())) {
-            GameObject.Destroy(GameObject.Find(gameObject.GetInstanceID().ToString()));
-            return;
-        }
-        /* GameObject tem = new GameObject(gameObject.GetInstanceID().ToString());
-         tem.transform.position = gameObject.transform.position;
-         MeshRenderer mr = tem.AddComponent<MeshRenderer>();
-         TextMesh tm = tem.AddComponent<TextMesh>();
-         tm.text = titleX + ": " + showX + "\n" + titleY + ": " + showY + "\n" + titleZ + ": " + showZ;
-         tm.fontSize = 50;
-         tm.characterSize = 12;*/
-        GameObject Canvas = GameObject.Find("Canvas");
-        GameObject textGO = new GameObject(gameObject.GetInstanceID().ToString());
-        textGO.transform.parent = Canvas.transform;
-        textGO.AddComponent<RectTransform>();
-        Text textComponent = textGO.AddComponent<Text>();
-        textGO.transform.position = gameObject.transform.position-new Vector3(0.2f,0,0.2f);
-        textGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
-        textGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
-        textGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-        
-        for (int i=0; i < ( (showAdditionalData) ? headlines.Length : (headlines.Length-1)); i++) {
-            if (headlines[i] != null && data[i] != null) textComponent.text = textComponent.text + Environment.NewLine + headlines[i] + ": " + data[i];
-        }
-        textComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
-        textComponent.fontSize = 20;
     }
 }
