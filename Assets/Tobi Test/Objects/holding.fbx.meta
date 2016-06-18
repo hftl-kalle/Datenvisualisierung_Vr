@@ -1,0 +1,135 @@
+fileFormatVersion: 2
+guid: 40349cb6d49009e4582ca0db5cc9785d
+timeCreated: 1466269505
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: BezierCurve
+    100002: button1
+    100004: button2
+    100006: button3
+    100008: button4
+    100010: Cube
+    100012: Cube.001
+    100014: Cube.002
+    100016: Cylinder
+    100018: //RootNode
+    400000: BezierCurve
+    400002: button1
+    400004: button2
+    400006: button3
+    400008: button4
+    400010: Cube
+    400012: Cube.001
+    400014: Cube.002
+    400016: Cylinder
+    400018: //RootNode
+    2300000: BezierCurve
+    2300002: button1
+    2300004: button2
+    2300006: button3
+    2300008: button4
+    2300010: Cube
+    2300012: Cube.001
+    2300014: Cube.002
+    2300016: Cylinder
+    3300000: BezierCurve
+    3300002: button1
+    3300004: button2
+    3300006: button3
+    3300008: button4
+    3300010: Cube
+    3300012: Cube.001
+    3300014: Cube.002
+    3300016: Cylinder
+    4300000: BezierCurve
+    4300002: button1
+    4300004: Cube
+    4300006: Cube.002
+    4300008: Cube.001
+    4300010: Cylinder
+    4300012: button2
+    4300014: button3
+    4300016: button4
+    7400000: button1|button1Action
+    7400002: button1|button2Action
+    7400004: button1|button3Action
+    7400006: button1|button4Action
+    7400008: button2|button1Action
+    7400010: button2|button2Action
+    7400012: button2|button3Action
+    7400014: button2|button4Action
+    7400016: button3|button1Action
+    7400018: button3|button2Action
+    7400020: button3|button3Action
+    7400022: button3|button4Action
+    7400024: button4|button1Action
+    7400026: button4|button2Action
+    7400028: button4|button3Action
+    7400030: button4|button4Action
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

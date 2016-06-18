@@ -274,12 +274,12 @@ public class DataController : MonoBehaviour {
 
     public void clearGraph() {
         foreach (GameObject point in points) {
-            GameObject.DestroyImmediate(point);
+            GameObject.Destroy(point);
         }
-        GameObject.DestroyImmediate(GameObject.Find("TerrainObj"));
-        GameObject.DestroyImmediate(GameObject.Find("Xaxis"));
-        GameObject.DestroyImmediate(GameObject.Find("Yaxis"));
-        GameObject.DestroyImmediate(GameObject.Find("Zaxis"));
+        GameObject.Destroy(GameObject.Find("TerrainObj"));
+        GameObject.Destroy(GameObject.Find("Xaxis"));
+        GameObject.Destroy(GameObject.Find("Yaxis"));
+        GameObject.Destroy(GameObject.Find("Zaxis"));
     }
 
     public void createBiMap() {

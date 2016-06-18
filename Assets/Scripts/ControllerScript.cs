@@ -89,7 +89,7 @@ public class ControllerScript : MonoBehaviour
         // check if clipboard is attached and if the trackpad is pressed. if so create 
         if (joint != null && device.GetTouchDown(SteamVR_Controller.ButtonMask.Touchpad)) {
             ClipboardScript script = joint.gameObject.GetComponent<ClipboardScript>();
-            script.OnMouseDown();
+            script.loadFile();
         }
 
         // check if trigger is pressed
