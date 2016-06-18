@@ -13,11 +13,13 @@ class ClipboardScript : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player");
     }
 
+    //if clicked enable holding
     public void OnMouseDown() {
         Cursor.visible = false;
         hold = true;
     }
 
+    //while holding active, the clipboard is offset away fom the player
     public void Update() {
         if (hold) {
             transform.position = player.transform.position + offset;
@@ -26,16 +28,19 @@ class ClipboardScript : MonoBehaviour {
         
     }
 
+    //if mouse up disable holding and active cursor
     public void OnMouseUp() {
         transform.position = transform.position;
         Cursor.visible = true;
         hold = false;
     }
 
+    //whether the clipboard should be moving with the player or not
     public void setHold(bool holding) {
         hold = holding;
     }
 
+    //load a csv file and display standard graph
     public void loadFile() {
         CSVDataObject csvData = CSVParser.loadCsv(file.FullName);
         //create chart parent
@@ -57,13 +62,14 @@ class ClipboardScript : MonoBehaviour {
         //creating graphs can be called with
         // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createLineGraph();
         //also possible .createHeatMap() // .createBiMap // .createMultiple2DGraphs
-        dc.createHeatMap();
+        dc.createLineGraph();
 
         if (csvData == null) {
             EditorUtility.DisplayDialog("Error", "Your csv seems to be invalid. Atleast x and y are required", "Ok");
         }
     }
 
+    //unload csv and destroy graph
     public void unloadFile() {
         GameObject chartParent = GameObject.Find("chartParent");
         DataController dc = chartParent.GetComponent<DataController>();
