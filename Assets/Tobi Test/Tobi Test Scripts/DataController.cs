@@ -83,7 +83,7 @@ public class DataController : MonoBehaviour {
     public void createPoints(float heatmapHeightReference = 0) {
         if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
         else createAxis();
-        clearGraph();
+        clearGraphImmediate();
 
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
@@ -118,12 +118,15 @@ public class DataController : MonoBehaviour {
             PointScript script = temp.AddComponent<PointScript>();
             script.headlines = data.getHeadlines();
             script.data = obj.getObjectArray();
+            Debug.Log("added");
             points.Add(temp);
         }
     }
 
     public void createLineGraph() {
         RenderMode = CurrentRenderMode.LineGraph;
+        createPoints();
+        Debug.Log(points);
         for (int i = 1; i < points.Count; i++) {
             GameObject o1 = points[i];
             GameObject o2 = points[i - 1];
@@ -280,6 +283,18 @@ public class DataController : MonoBehaviour {
         GameObject.Destroy(GameObject.Find("Xaxis"));
         GameObject.Destroy(GameObject.Find("Yaxis"));
         GameObject.Destroy(GameObject.Find("Zaxis"));
+        points = new List<GameObject>();
+    }
+
+    public void clearGraphImmediate() {
+        foreach (GameObject point in points) {
+            GameObject.DestroyImmediate(point);
+        }
+        GameObject.DestroyImmediate(GameObject.Find("TerrainObj"));
+        GameObject.DestroyImmediate(GameObject.Find("Xaxis"));
+        GameObject.DestroyImmediate(GameObject.Find("Yaxis"));
+        GameObject.DestroyImmediate(GameObject.Find("Zaxis"));
+        points = new List<GameObject>();
     }
 
     public void createBiMap() {
