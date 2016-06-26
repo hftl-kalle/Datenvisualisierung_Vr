@@ -383,5 +383,43 @@ public class DataController : MonoBehaviour {
         lrz.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(0, 0, 1)));
         lrz.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(0, 0, -1)));
         lrz.useWorldSpace = false;
+
+        string[] headlines = data.getHeadlines();
+        GameObject Canvas = GameObject.Find("Canvas");
+        GameObject xtextGO = new GameObject(gameObject.GetInstanceID().ToString());
+        xtextGO.transform.parent = Canvas.transform;
+        xtextGO.AddComponent<RectTransform>();
+        Text xtextComponent = xtextGO.AddComponent<Text>();
+        xtextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(1, 0, 0));
+        xtextGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        xtextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
+        xtextGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+        xtextComponent.text = headlines[0];
+        xtextComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+        xtextComponent.fontSize = 20;
+
+        GameObject ytextGO = new GameObject(gameObject.GetInstanceID().ToString());
+        ytextGO.transform.parent = Canvas.transform;
+        ytextGO.AddComponent<RectTransform>();
+        Text ytextComponent = ytextGO.AddComponent<Text>();
+        ytextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 1, 0));
+        ytextGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        ytextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
+        ytextGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+        ytextComponent.text = headlines[1];
+        ytextComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+        ytextComponent.fontSize = 20;
+
+        GameObject ztextGO = new GameObject(gameObject.GetInstanceID().ToString());
+        ztextGO.transform.parent = Canvas.transform;
+        ztextGO.AddComponent<RectTransform>();
+        Text ztextComponent = ztextGO.AddComponent<Text>();
+        ztextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 0, -1));
+        ztextGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        ztextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
+        ztextGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+        ztextComponent.text = headlines[2];
+        ztextComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+        ztextComponent.fontSize = 20;
     }
 }
