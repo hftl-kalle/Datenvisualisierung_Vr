@@ -209,11 +209,6 @@ public class DataController : MonoBehaviour {
 
                 float pointHeigth = (points[k].transform.localPosition.y + quadrantSize.y) / overallSize.y;
 
-                Debug.Log(x1);
-                Debug.Log(z1);
-                Debug.Log(pointHeigth);
-
-
                 htmap[z1, x1] = pointHeigth;
 
                 range++;
