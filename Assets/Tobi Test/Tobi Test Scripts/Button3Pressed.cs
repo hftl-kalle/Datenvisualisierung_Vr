@@ -17,9 +17,15 @@ public class Button3Pressed : ButtonPressed {
         activateButton();
     }
 
+    void OnTriggerEnter(Collider coll)
+    {
+        Debug.Log("3 pressed");
+        activateButton();
+    }
+
     public override void deactivateButton() {
         if (GameObject.Find("chartParent") != null) {
-            ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createBiMap();
+           // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createBiMap();
             renderer.sharedMaterial = inactiveMaterial;
         }
     }

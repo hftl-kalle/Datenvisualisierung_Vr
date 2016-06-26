@@ -16,10 +16,15 @@ public class Button2Pressed : ButtonPressed {
     public void OnMouseDown() {
         activateButton();
     }
+    void OnTriggerEnter(Collider coll)
+    {
+        Debug.Log("2 pressed");
+        activateButton();
+    }
 
     public override void deactivateButton() {
         if (GameObject.Find("chartParent") != null) {
-            ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createMultiple2DGraphs();
+           // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createMultiple2DGraphs();
             renderer.sharedMaterial = inactiveMaterial;
         }
     }

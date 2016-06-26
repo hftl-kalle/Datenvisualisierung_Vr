@@ -7,7 +7,7 @@ using System.Linq;
 
 public class DataController : MonoBehaviour {
 
-    private enum CurrentRenderMode {
+    public enum CurrentRenderMode {
         LineGraph,
         HeatMap,
         BiMap,
@@ -20,7 +20,7 @@ public class DataController : MonoBehaviour {
     private static Vector3 overallSize = new Vector3(2, 2, 2);
     private static Vector3 quadrantSize = overallSize / 2;
 
-    CurrentRenderMode RenderMode;
+    public CurrentRenderMode RenderMode;
     private List<GameObject> points = new List<GameObject>();
     enum HeatmapLayers : int { DarkBlue, LightBlue, Green, Yellow, Orange, Red };
 
@@ -35,7 +35,7 @@ public class DataController : MonoBehaviour {
 
     public void init(CSVDataObject csvData) {
         this.data = csvData;
-        GameObject.Find("chartParent").transform.localPosition = origin;
+        //GameObject.Find("chartParent").transform.localPosition = origin;
     }
 
     public void init(CSVDataObject csvData, Vector3 scaleParam) {
@@ -82,8 +82,8 @@ public class DataController : MonoBehaviour {
 
     public void createPoints(float heatmapHeightReference = 0) {
         if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
-        else createAxis();
-        clearGraphImmediate();
+        clearGraph();
+        createAxis();
 
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
@@ -101,7 +101,6 @@ public class DataController : MonoBehaviour {
 
             float scaleX = quadrantSize.x / ListUtils.getMaxAbsolutAmount(data.getAllX());
             float posX = x * scaleX;
-            print(posX);
             float scaleZ = quadrantSize.z / ListUtils.getMaxAbsolutAmount(data.getAllZ());
             float posZ = z * scaleZ * (-1);
 
@@ -118,7 +117,6 @@ public class DataController : MonoBehaviour {
             PointScript script = temp.AddComponent<PointScript>();
             script.headlines = data.getHeadlines();
             script.data = obj.getObjectArray();
-            Debug.Log("added");
             points.Add(temp);
         }
     }
@@ -126,7 +124,6 @@ public class DataController : MonoBehaviour {
     public void createLineGraph() {
         RenderMode = CurrentRenderMode.LineGraph;
         createPoints();
-        Debug.Log(points);
         for (int i = 1; i < points.Count; i++) {
             GameObject o1 = points[i];
             GameObject o2 = points[i - 1];
@@ -336,7 +333,7 @@ public class DataController : MonoBehaviour {
         xaxis.transform.parent = chartParent.transform;
         xaxis.tag = "axis";
         BoxCollider xbc = xaxis.AddComponent<BoxCollider>();
-        xbc.center = new Vector3(1, 1, 1);
+        xbc.center = chartParent.transform.TransformPoint( new Vector3(0, 0, 0));
         xbc.size = new Vector3(2, 0.05f, 0.05f);
 
         GameObject yaxis = new GameObject("Yaxis");
@@ -345,7 +342,7 @@ public class DataController : MonoBehaviour {
         yaxis.transform.parent = chartParent.transform;
         yaxis.tag = "axis";
         BoxCollider ybc = yaxis.AddComponent<BoxCollider>();
-        ybc.center = new Vector3(1, 1, 1);
+        ybc.center = chartParent.transform.TransformPoint(new Vector3(0, 0, 0));
         ybc.size = new Vector3(0.05f, 2, 0.05f);
 
         GameObject zaxis = new GameObject("Zaxis");
@@ -354,29 +351,29 @@ public class DataController : MonoBehaviour {
         zaxis.transform.parent = chartParent.transform;
         zaxis.tag = "axis";
         BoxCollider zbc = zaxis.AddComponent<BoxCollider>();
-        zbc.center = new Vector3(1, 1, 1);
+        zbc.center = chartParent.transform.TransformPoint(new Vector3(0, 0, 0));
         zbc.size = new Vector3(0.05f, 0.05f, 2);
 
         LineRenderer lrx = xaxis.AddComponent<LineRenderer>();
         lrx.material = new Material(Shader.Find("Sprites/Default"));
         lrx.SetWidth(0.05f, 0.05f);
         lrx.SetColors(Color.blue, Color.blue);
-        lrx.SetPosition(0, new Vector3(2, 1, 1));
-        lrx.SetPosition(1, new Vector3(0, 1, 1));
+        lrx.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(1, 0, 0)));
+        lrx.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(-1, 0, 0)));
         lrx.useWorldSpace = false;
         LineRenderer lry = yaxis.AddComponent<LineRenderer>();
         lry.material = new Material(Shader.Find("Sprites/Default"));
         lry.SetWidth(0.05f, 0.05f);
         lry.SetColors(Color.blue, Color.blue);
-        lry.SetPosition(0, new Vector3(1, 2, 1));
-        lry.SetPosition(1, new Vector3(1, 0, 1));
+        lry.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(0, 1, 0)));
+        lry.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(0, -1, 0)));
         lry.useWorldSpace = false;
         LineRenderer lrz = zaxis.AddComponent<LineRenderer>();
         lrz.material = new Material(Shader.Find("Sprites/Default"));
         lrz.SetWidth(0.05f, 0.05f);
         lrz.SetColors(Color.blue, Color.blue);
-        lrz.SetPosition(0, new Vector3(1, 1, 2));
-        lrz.SetPosition(1, new Vector3(1, 1, 0));
+        lrz.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(0, 0, 1)));
+        lrz.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(0, 0, -1)));
         lrz.useWorldSpace = false;
     }
 }
