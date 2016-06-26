@@ -102,6 +102,7 @@ public class DataController : MonoBehaviour {
             float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(stringValsY, (string)obj.getY());
             float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(stringValsZ, (string)obj.getZ());
 
+
             float scaleX = quadrantSize.x / (ListUtils.getMaxAbsolutAmount(data.getAllX()));
             float posX = x * scaleX;
             float scaleZ = quadrantSize.z / (ListUtils.getMaxAbsolutAmount(data.getAllZ()));
@@ -140,7 +141,7 @@ public class DataController : MonoBehaviour {
     public void createHeatMap() {
         RenderMode = CurrentRenderMode.HeatMap;
         //float heatmapHeightReference = ListUtils.getHighestFloat(data.getAllW());
-        float heatmapHeightReference = 0;
+        float heatmapHeightReference = 1;
         createPoints(heatmapHeightReference);
         // set everything to 0
         float[,] htmap = new float[129, 129];
@@ -199,11 +200,11 @@ public class DataController : MonoBehaviour {
         }
 
         for (int k = 0; k < points.Count; k++) {
-            //points[k].SetActive(false);
+            points[k].SetActive(false);
             if (points[k].transform.position.y > 0) {
 
                 //best use multiple of 6
-                int range = 6;
+                int range = 4;
                 float percentage = (float)Math.Round(1.0 / (range + 1), 2);
 
                 int x1 = (int)((_heightmapWidth / 2) + (points[k].transform.localPosition.x * (_heightmapWidth / 2)));
