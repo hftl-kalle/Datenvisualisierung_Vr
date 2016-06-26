@@ -80,8 +80,8 @@ public class DataController : MonoBehaviour {
         }
     }
 
-    public void createPoints(float heatmapHeightReference = 0) {
-        if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
+    public void createPoints(float heatmapHeightReference = 0, float offset = 0) {
+        if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y - offset;
         clearGraph();
         createAxis();
         
@@ -100,13 +100,13 @@ public class DataController : MonoBehaviour {
             float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(stringValsY, (string)obj.getY());
             float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(stringValsZ, (string)obj.getZ());
 
-            float scaleX = quadrantSize.x / ListUtils.getMaxAbsolutAmount(data.getAllX());
-            float posX = x * scaleX;
-            float scaleZ = quadrantSize.z / ListUtils.getMaxAbsolutAmount(data.getAllZ());
-            float posZ = z * scaleZ * (-1);
+            float scaleX = (quadrantSize.x - offset) / ListUtils.getMaxAbsolutAmount(data.getAllX());
+            float posX = x * scaleX + offset;
+            float scaleZ = (quadrantSize.z - offset) / ListUtils.getMaxAbsolutAmount(data.getAllZ());
+            float posZ = z * scaleZ * (-1) + offset;
 
             float scaleY = heatmapHeightReference / ListUtils.getMaxAbsolutAmount(data.getAllY());
-            float posY = y * scaleY;
+            float posY = y * scaleY + offset;
 
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
@@ -302,7 +302,7 @@ public class DataController : MonoBehaviour {
 
     public void createBiMap() {
         RenderMode= CurrentRenderMode.BiMap;
-        createPoints();
+        createPoints(offset: 0.25f);
         for (int i = 1; i < points.Count; i++) {
             PointScript script = points[i].GetComponent<PointScript>();
             script.showAdditionalData = true;
