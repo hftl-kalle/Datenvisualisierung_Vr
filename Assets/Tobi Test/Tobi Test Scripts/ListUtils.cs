@@ -42,7 +42,7 @@ public static class ListUtils {
 
         if (list.Count <= 0) return 0;
 
-        if (list[0] is string) return getAmountOfObjects(list);
+        if (list[0] is string) return getAmountOfObjects(list) + 1;
 
         return list.Select(x => Math.Abs((float)x)).ToList().Max();
     }

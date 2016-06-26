@@ -80,8 +80,8 @@ public class DataController : MonoBehaviour {
         }
     }
 
-    public void createPoints(float heatmapHeightReference = 0, float offset = 0) {
-        if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y - offset;
+    public void createPoints(float heatmapHeightReference = 0) {
+        if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y ;
         clearGraph();
         createAxis();
 
@@ -90,6 +90,9 @@ public class DataController : MonoBehaviour {
         Dictionary<string, float> stringValsX = new Dictionary<string, float>();
         Dictionary<string, float> stringValsY = new Dictionary<string, float>();
         Dictionary<string, float> stringValsZ = new Dictionary<string, float>();
+        stringValsX.Add("",0);
+        stringValsY.Add("", 0);
+        stringValsZ.Add("", 0);
         GameObject chartParent = GameObject.Find("chartParent");
 
         foreach (MultidimensionalObject obj in data.getData()) {
@@ -99,13 +102,13 @@ public class DataController : MonoBehaviour {
             float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(stringValsY, (string)obj.getY());
             float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(stringValsZ, (string)obj.getZ());
 
-            float scaleX = (quadrantSize.x - offset) / ListUtils.getMaxAbsolutAmount(data.getAllX());
-            float posX = x * scaleX + offset;
-            float scaleZ = (quadrantSize.z - offset) / ListUtils.getMaxAbsolutAmount(data.getAllZ());
-            float posZ = z * scaleZ * (-1) + offset;
+            float scaleX = quadrantSize.x / (ListUtils.getMaxAbsolutAmount(data.getAllX()));
+            float posX = x * scaleX;
+            float scaleZ = quadrantSize.z / (ListUtils.getMaxAbsolutAmount(data.getAllZ()));
+            float posZ = z * scaleZ * (-1);
 
-            float scaleY = heatmapHeightReference / ListUtils.getMaxAbsolutAmount(data.getAllY());
-            float posY = y * scaleY + offset;
+            float scaleY = heatmapHeightReference / (ListUtils.getMaxAbsolutAmount(data.getAllY()));
+            float posY = y * scaleY;
 
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
@@ -301,7 +304,7 @@ public class DataController : MonoBehaviour {
 
     public void createBiMap() {
         RenderMode= CurrentRenderMode.BiMap;
-        createPoints(offset: 0.25f);
+        createPoints();
         for (int i = 1; i < points.Count; i++) {
             PointScript script = points[i].GetComponent<PointScript>();
             script.showAdditionalData = true;
