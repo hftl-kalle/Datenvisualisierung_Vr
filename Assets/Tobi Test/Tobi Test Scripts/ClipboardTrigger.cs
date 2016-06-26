@@ -22,7 +22,6 @@ public class ClipboardTrigger : MonoBehaviour {
 
     /* if the clipboard is moved out of the bx collider unload the csv and disable trigger for 2 seconds to allow moving the clipboard out of the way */
     IEnumerator OnTriggerExit(Collider other) {
-        Debug.Log("Exit");
         other.gameObject.GetComponent<ClipboardScript>().unloadFile();
         gameObject.GetComponent<BoxCollider>().isTrigger = false;
         yield return new WaitForSeconds(2);

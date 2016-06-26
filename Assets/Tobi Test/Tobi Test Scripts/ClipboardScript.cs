@@ -48,7 +48,7 @@ class ClipboardScript : MonoBehaviour {
         if (chartParent != null) {
             Destroy(chartParent);
             foreach (Transform child in GameObject.Find("Canvas").transform) {
-                GameObject.DestroyImmediate(child.gameObject);
+                GameObject.Destroy(child.gameObject);
             }
         }
         // create chart parent with axis

@@ -82,8 +82,9 @@ public class DataController : MonoBehaviour {
 
     public void createPoints(float heatmapHeightReference = 0) {
         if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
-        else createAxis();
-        clearGraphImmediate();
+        clearGraph();
+        createAxis();
+        
 
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
@@ -124,7 +125,6 @@ public class DataController : MonoBehaviour {
     public void createLineGraph() {
         RenderMode = CurrentRenderMode.LineGraph;
         createPoints();
-        Debug.Log(points);
         for (int i = 1; i < points.Count; i++) {
             GameObject o1 = points[i];
             GameObject o2 = points[i - 1];
@@ -140,6 +140,7 @@ public class DataController : MonoBehaviour {
         //float heatmapHeightReference = ListUtils.getHighestFloat(data.getAllW());
         float heatmapHeightReference = 0;
         createPoints(heatmapHeightReference);
+        // set everything to 0
         float[,] htmap = new float[129, 129];
            for (int x = 0; x < htmap.GetLength(0); x++) {
                for (int z = 0; z < htmap.GetLength(1); z++) {
@@ -149,8 +150,10 @@ public class DataController : MonoBehaviour {
 
         //create terrain
         GameObject terrainObj = new GameObject("TerrainObj");
-        terrainObj.transform.parent = GameObject.Find("chartParent").transform;
+        GameObject chartParent = GameObject.Find("chartParent");
+        terrainObj.transform.parent = chartParent.transform;
         terrainObj.transform.localPosition = -quadrantSize;
+        //center the terrain
         TerrainData terrainData = new TerrainData();
         //set terrain size
         terrainData.size = new Vector3(0.25f*overallSize.x * scale.x, 1f*overallSize.y * scale.y, 0.25f*overallSize.z * scale.z);
@@ -193,17 +196,24 @@ public class DataController : MonoBehaviour {
             }
         }
 
-        /* smooth the heatmap raises */
         for (int k = 0; k < points.Count; k++) {
             //points[k].SetActive(false);
             if (points[k].transform.position.y > 0) {
 
                 //best use multiple of 6
-                int range = 12;
+                int range = 6;
                 float percentage = (float)Math.Round(1.0 / (range + 1), 2);
-                int x1 =  (int)((points[k].transform.position.x / terrain.terrainData.size.x) * _heightmapWidth);
-                int z1 = (int)((points[k].transform.position.z / terrain.terrainData.size.z) * _heightmapHeight);
-                float pointHeigth = points[k].transform.position.y / (overallSize.y * scale.y);
+
+                int x1 = (int)((_heightmapWidth / 2) + (points[k].transform.localPosition.x * (_heightmapWidth / 2)));
+                int z1 = (int)((_heightmapHeight / 2) + ( points[k].transform.localPosition.z * (_heightmapHeight / 2)));
+
+                float pointHeigth = (points[k].transform.localPosition.y + quadrantSize.y) / overallSize.y;
+
+                Debug.Log(x1);
+                Debug.Log(z1);
+                Debug.Log(pointHeigth);
+
+
                 htmap[z1, x1] = pointHeigth;
 
                 range++;
@@ -214,7 +224,7 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
-                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (overallSize.y * scale.y);
+                                        float heigth = (range + 1 - ix) * percentage * pointHeigth;
                                         float[] splatWeights = new float[terrainData.alphamapLayers];
                                         if (heigth > heatmapColorThreshold[HeatmapLayers.Orange]) {
                                             splatWeights[5] = 1f;
@@ -250,7 +260,7 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {                    
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
-                                        float heigth = (range + 1 - ix) * percentage * points[k].transform.position.y / (overallSize.y * scale.y);
+                                        float heigth = (range + 1 - ix) * percentage * pointHeigth;
                                         foreach (HeatmapLayers layer in Enum.GetValues(typeof(HeatmapLayers))) {
                                             if (heigth <= heatmapColorThreshold[layer]) {
                                                 if (heatmapColorThreshold[layer] > pointHeigth) {
@@ -376,5 +386,9 @@ public class DataController : MonoBehaviour {
         lrz.SetPosition(0, new Vector3(1, 1, 2));
         lrz.SetPosition(1, new Vector3(1, 1, 0));
         lrz.useWorldSpace = false;
+
+        xaxis.transform.localPosition = new Vector3(-1,-1,-1);
+        yaxis.transform.localPosition = new Vector3(-1, -1, -1);
+        zaxis.transform.localPosition = new Vector3(-1, -1, -1);
     }
 }
