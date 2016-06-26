@@ -23,11 +23,6 @@ public class Button2Pressed : ButtonPressed {
     }
 
     public override void deactivateButton() {
-<<<<<<< HEAD
-        if (GameObject.Find("chartParent") != null) {
-           // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createMultiple2DGraphs();
-=======
->>>>>>> origin/dev
             renderer.sharedMaterial = inactiveMaterial;
     }
 
