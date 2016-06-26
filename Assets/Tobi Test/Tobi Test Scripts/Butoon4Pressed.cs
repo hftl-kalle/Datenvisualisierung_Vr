@@ -16,8 +16,19 @@ public class Butoon4Pressed : ButtonPressed {
     public void OnMouseDown() {
         activateButton();
     }
+    void OnTriggerEnter(Collider coll)
+    {
+        Debug.Log("4 pressed");
+        activateButton();
+    }
+
 
     public override void deactivateButton() {
+<<<<<<< HEAD
+        if (GameObject.Find("chartParent") != null) {
+           // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createHeatMap();
+=======
+>>>>>>> origin/dev
             renderer.sharedMaterial = inactiveMaterial;
     }
 

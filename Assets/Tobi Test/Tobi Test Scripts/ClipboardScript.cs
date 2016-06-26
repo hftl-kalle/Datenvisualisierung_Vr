@@ -55,7 +55,7 @@ class ClipboardScript : MonoBehaviour {
 
         chartParent = new GameObject("chartParent");
         //attach data controller to chart parent and init it
-
+        chartParent.transform.position = new Vector3(-1, 1, 0);
         DataController dc = chartParent.AddComponent<DataController>();
         dc.init(csvData);
 
