@@ -84,10 +84,6 @@ public class DataController : MonoBehaviour {
         if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y - offset;
         clearGraph();
         createAxis();
-<<<<<<< HEAD
-=======
-        
->>>>>>> origin/dev
 
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
@@ -384,9 +380,5 @@ public class DataController : MonoBehaviour {
         lrz.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(0, 0, 1)));
         lrz.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(0, 0, -1)));
         lrz.useWorldSpace = false;
-
-        xaxis.transform.localPosition = new Vector3(-1,-1,-1);
-        yaxis.transform.localPosition = new Vector3(-1, -1, -1);
-        zaxis.transform.localPosition = new Vector3(-1, -1, -1);
     }
 }
