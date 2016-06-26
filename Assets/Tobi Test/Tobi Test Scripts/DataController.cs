@@ -314,21 +314,31 @@ public class DataController : MonoBehaviour {
     }
 
     public void createMultiple2DGraphs() {
+        Color[] colors = new Color[] { Color.black, Color.red, Color.yellow, Color.green,Color.magenta, new Color(1f/165f, 1f / 42f, 1f / 42f, 1), new Color(1f / 255f, 1f / 20f, 1f / 147f, 1)};
         RenderMode = CurrentRenderMode.Multiple;
         createPoints();
         Dictionary<float, GameObject> zValues = new Dictionary<float, GameObject>();
+        Dictionary<float, Color> colorValues = new Dictionary<float, Color>();
+        points[0].transform.localScale = new Vector3(0.01f * overallSize.x * scale.x, 0.01f * overallSize.y * scale.y, 0.01f * overallSize.z * scale.z);
         for (int i = 1; i < points.Count; i++) {
             GameObject point = points[i];
+            point.transform.localScale = new Vector3(0.01f * overallSize.x * scale.x, 0.01f * overallSize.y * scale.y, 0.01f * overallSize.z * scale.z);
             if (zValues.ContainsKey(point.transform.position.z)) {
                 GameObject pointOld = zValues[point.transform.position.z];
                 zValues.Remove(point.transform.position.z);
                 LineRenderer lr = pointOld.AddComponent<LineRenderer>();
                 lr.SetPosition(0, point.transform.position);
                 lr.SetPosition(1, pointOld.transform.position);
+                lr.SetColors(colorValues[point.transform.position.z], colorValues[point.transform.position.z]);
+                Material whiteDiffuseMat = new Material(Shader.Find("Sprites/Default"));
+                lr.material = whiteDiffuseMat;
                 lr.SetWidth(0.029f * scale.magnitude, 0.029f * scale.magnitude);
                 zValues.Add(point.transform.position.z, point);
             } else {
                 zValues.Add(point.transform.position.z, point);
+                int count = colorValues.Keys.Count();
+                if (count >= colors.Length) count = colors.Length - 1;
+                colorValues.Add(point.transform.position.z, colors[count]);
             }
         }
     }
