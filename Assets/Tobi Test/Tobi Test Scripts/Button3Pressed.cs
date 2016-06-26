@@ -24,10 +24,12 @@ public class Button3Pressed : ButtonPressed {
     }
 
     public override void deactivateButton() {
+<<<<<<< HEAD
         if (GameObject.Find("chartParent") != null) {
            // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createBiMap();
+=======
+>>>>>>> origin/dev
             renderer.sharedMaterial = inactiveMaterial;
-        }
     }
 
     public override void activateButton() {

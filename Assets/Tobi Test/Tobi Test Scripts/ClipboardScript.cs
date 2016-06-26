@@ -42,14 +42,13 @@ class ClipboardScript : MonoBehaviour {
 
     //load a csv file and display standard graph
     public void loadFile() {
-        Debug.Log("Loading");
         CSVDataObject csvData = CSVParser.loadCsv(file.FullName);
         //create chart parent
         GameObject chartParent = GameObject.Find("chartParent");
         if (chartParent != null) {
             Destroy(chartParent);
             foreach (Transform child in GameObject.Find("Canvas").transform) {
-                GameObject.DestroyImmediate(child.gameObject);
+                GameObject.Destroy(child.gameObject);
             }
         }
         // create chart parent with axis
