@@ -11,7 +11,7 @@ public class Button1Pressed : ButtonPressed {
     public void Start() {
         if (renderer == null) renderer = GetComponent<MeshRenderer>();
         renderer.enabled = true;
-        renderer.sharedMaterial = activeMaterial;
+        renderer.sharedMaterial = inactiveMaterial;
     }
 
     public void OnMouseDown() {

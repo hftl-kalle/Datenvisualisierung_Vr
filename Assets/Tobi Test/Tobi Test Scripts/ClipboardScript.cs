@@ -62,7 +62,9 @@ class ClipboardScript : MonoBehaviour {
         //creating graphs can be called with
         // ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createLineGraph();
         //also possible .createHeatMap() // .createBiMap // .createMultiple2DGraphs
-        dc.createLineGraph();
+        foreach (GameObject go in GameObject.FindGameObjectsWithTag("holding_button")) {
+            go.GetComponent<ButtonPressed>().deactivateButton();
+        }
 
         if (csvData == null) {
             EditorUtility.DisplayDialog("Error", "Your csv seems to be invalid. Atleast x and y are required", "Ok");
