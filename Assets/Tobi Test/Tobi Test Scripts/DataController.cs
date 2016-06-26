@@ -380,9 +380,5 @@ public class DataController : MonoBehaviour {
         lrz.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(0, 0, 1)));
         lrz.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(0, 0, -1)));
         lrz.useWorldSpace = false;
-
-        //xaxis.transform.localPosition = new Vector3(-1,-1,-1);
-        //yaxis.transform.localPosition = new Vector3(-1, -1, -1);
-        //zaxis.transform.localPosition = new Vector3(-1, -1, -1);
     }
 }
