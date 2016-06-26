@@ -7,6 +7,7 @@ TagManager:
   - clipboard
   - pointInCloud
   - axis
+  - holding_button
   layers:
   - Default
   - TransparentFX
