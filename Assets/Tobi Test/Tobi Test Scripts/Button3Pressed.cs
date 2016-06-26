@@ -18,10 +18,7 @@ public class Button3Pressed : ButtonPressed {
     }
 
     public override void deactivateButton() {
-        if (GameObject.Find("chartParent") != null) {
-            ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createBiMap();
             renderer.sharedMaterial = inactiveMaterial;
-        }
     }
 
     public override void activateButton() {

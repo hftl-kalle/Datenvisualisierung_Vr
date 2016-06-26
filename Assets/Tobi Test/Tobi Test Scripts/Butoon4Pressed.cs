@@ -18,10 +18,7 @@ public class Butoon4Pressed : ButtonPressed {
     }
 
     public override void deactivateButton() {
-        if (GameObject.Find("chartParent") != null) {
-            ((DataController)GameObject.Find("chartParent").GetComponent(typeof(DataController))).createHeatMap();
             renderer.sharedMaterial = inactiveMaterial;
-        }
     }
 
     public override void activateButton() {

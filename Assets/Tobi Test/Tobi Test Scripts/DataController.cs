@@ -101,7 +101,6 @@ public class DataController : MonoBehaviour {
 
             float scaleX = quadrantSize.x / ListUtils.getMaxAbsolutAmount(data.getAllX());
             float posX = x * scaleX;
-            print(posX);
             float scaleZ = quadrantSize.z / ListUtils.getMaxAbsolutAmount(data.getAllZ());
             float posZ = z * scaleZ * (-1);
 
@@ -118,7 +117,6 @@ public class DataController : MonoBehaviour {
             PointScript script = temp.AddComponent<PointScript>();
             script.headlines = data.getHeadlines();
             script.data = obj.getObjectArray();
-            Debug.Log("added");
             points.Add(temp);
         }
     }
