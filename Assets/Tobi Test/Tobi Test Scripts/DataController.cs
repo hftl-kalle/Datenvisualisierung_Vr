@@ -25,11 +25,11 @@ public class DataController : MonoBehaviour {
     enum HeatmapLayers : int { DarkBlue, LightBlue, Green, Yellow, Orange, Red };
 
     Dictionary<HeatmapLayers, float> heatmapColorThreshold = new Dictionary<HeatmapLayers, float>() {
-        {HeatmapLayers.DarkBlue, 0.165f},
-        {HeatmapLayers.LightBlue, 0.33f},
-        {HeatmapLayers.Green, 0.495f},
-        {HeatmapLayers.Yellow, 0.66f},
-        {HeatmapLayers.Orange, 0.825f},
+        {HeatmapLayers.DarkBlue, 0.25f},
+        {HeatmapLayers.LightBlue, 0.45f},
+        {HeatmapLayers.Green, 0.6f},
+        {HeatmapLayers.Yellow, 0.8f},
+        {HeatmapLayers.Orange, 0.95f},
         {HeatmapLayers.Red, 1f}
     };
 
@@ -222,7 +222,12 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
+                                        /* use this for our example heatmap */
+                                        float heigth = pointHeigth;
+
+                                        /* use this for normal heatmap
                                         float heigth = (range + 1 - ix) * percentage * pointHeigth;
+                                        */
                                         float[] splatWeights = new float[terrainData.alphamapLayers];
                                         if (heigth > heatmapColorThreshold[HeatmapLayers.Orange]) {
                                             splatWeights[5] = 1f;
@@ -258,7 +263,12 @@ public class DataController : MonoBehaviour {
                             for (int ix = range; ix >= 0; ix--) {
                                 if (Math.Abs(rx) == ix || Math.Abs(rz) == ix) {                    
                                     if (htmap[z1 + rz, x1 + rx] == 0) {
+                                        /* use this for our example heatmap */
+                                        float heigth = pointHeigth;
+
+                                        /* use this for normal heatmap
                                         float heigth = (range + 1 - ix) * percentage * pointHeigth;
+                                        */
                                         foreach (HeatmapLayers layer in Enum.GetValues(typeof(HeatmapLayers))) {
                                             if (heigth <= heatmapColorThreshold[layer]) {
                                                 if (heatmapColorThreshold[layer] > pointHeigth) {
