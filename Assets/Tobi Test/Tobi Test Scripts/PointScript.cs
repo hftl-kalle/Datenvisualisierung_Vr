@@ -35,9 +35,14 @@ public class PointScript : MonoBehaviour {
         textGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
         textGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
 
-        for (int i = 0; i < ((showAdditionalData) ? headlines.Length : (headlines.Length - 1)); i++) {
+        for (int i = 0; i <  headlines.Length - 1; i++) {
             if (headlines[i] != null && data[i] != null) textComponent.text = textComponent.text + Environment.NewLine + headlines[i] + ": " + data[i];
         }
+
+        if (showAdditionalData) {
+            if (headlines[3] != null && data[3] != null) textComponent.text = headlines[3] + ": " + data[3];
+        }
+
         textComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
         textComponent.fontSize = 20;
     }
