@@ -72,6 +72,9 @@ public class DataController : MonoBehaviour {
 
     //return value from map or insert it if not found
     private float safeGetValueFromMap(Dictionary<string, float> d, string s) {
+        if (s == null) {
+            return 0;
+        }
         if (d.ContainsKey(s)) {
             return d[s];
         } else {
@@ -102,13 +105,16 @@ public class DataController : MonoBehaviour {
             float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(stringValsY, (string)obj.getY());
             float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(stringValsZ, (string)obj.getZ());
 
-
-            float scaleX = quadrantSize.x / (ListUtils.getMaxAbsolutAmount(data.getAllX()));
+            float absoluteX = (ListUtils.getMaxAbsolutAmount(data.getAllX()) != 0f) ? ListUtils.getMaxAbsolutAmount(data.getAllX()) : 1;
+            float scaleX = quadrantSize.x / absoluteX;
             float posX = x * scaleX;
-            float scaleZ = quadrantSize.z / (ListUtils.getMaxAbsolutAmount(data.getAllZ()));
+
+            float absoluteZ = (ListUtils.getMaxAbsolutAmount(data.getAllZ()) != 0f) ? ListUtils.getMaxAbsolutAmount(data.getAllZ()) : 1;
+            float scaleZ = quadrantSize.z / absoluteZ;
             float posZ = z * scaleZ * (-1);
 
-            float scaleY = heatmapHeightReference / (ListUtils.getMaxAbsolutAmount(data.getAllY()));
+            float absoluteY = (ListUtils.getMaxAbsolutAmount(data.getAllY()) != 0f) ? ListUtils.getMaxAbsolutAmount(data.getAllY()) : 1;
+            float scaleY = heatmapHeightReference / absoluteY;
             float posY = y * scaleY;
 
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);

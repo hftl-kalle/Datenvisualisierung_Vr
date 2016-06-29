@@ -32,7 +32,7 @@ public class ListUtilsTest {
 
     private void testListUtilsGetMaxAbsolutAmount1() {
         List<object> list = new List<object> { "abc", "def", "geh" };
-        TestHelper.assert(ListUtils.getMaxAbsolutAmount(list) == 2f);
+        TestHelper.assert(ListUtils.getMaxAbsolutAmount(list) == 3f);
     }
 
     private void testListUtilsGetMaxAbsolutAmount2() {
