@@ -295,6 +295,11 @@ public class DataController : MonoBehaviour {
         foreach (GameObject point in points) {
             GameObject.Destroy(point);
         }
+        Transform canvas = GameObject.Find("Canvas").transform;
+        foreach (Transform text in canvas)
+        {
+            GameObject.Destroy(text.gameObject);
+        }
         GameObject.Destroy(GameObject.Find("TerrainObj"));
         GameObject.Destroy(GameObject.Find("Xaxis"));
         GameObject.Destroy(GameObject.Find("Yaxis"));
@@ -305,6 +310,11 @@ public class DataController : MonoBehaviour {
     public void clearGraphImmediate() {
         foreach (GameObject point in points) {
             GameObject.DestroyImmediate(point);
+        }
+        Transform canvas = GameObject.Find("Canvas").transform;
+        foreach (Transform text in canvas)
+        {
+            GameObject.Destroy(text.gameObject);
         }
         GameObject.DestroyImmediate(GameObject.Find("TerrainObj"));
         GameObject.DestroyImmediate(GameObject.Find("Xaxis"));
@@ -412,7 +422,8 @@ public class DataController : MonoBehaviour {
         xtextGO.AddComponent<RectTransform>();
         Text xtextComponent = xtextGO.AddComponent<Text>();
         xtextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(1, 0, 0));
-        xtextGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        LookAt xLA = xtextGO.AddComponent<LookAt>();
+        xLA.target = GameObject.Find("Camera (eye)").transform;
         xtextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
         xtextGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
         xtextComponent.text = headlines[0];
@@ -424,7 +435,8 @@ public class DataController : MonoBehaviour {
         ytextGO.AddComponent<RectTransform>();
         Text ytextComponent = ytextGO.AddComponent<Text>();
         ytextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 1, 0));
-        ytextGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        LookAt yLA = ytextGO.AddComponent<LookAt>();
+        yLA.target = GameObject.Find("Camera (eye)").transform;
         ytextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
         ytextGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
         ytextComponent.text = headlines[1];
@@ -435,8 +447,9 @@ public class DataController : MonoBehaviour {
         ztextGO.transform.parent = Canvas.transform;
         ztextGO.AddComponent<RectTransform>();
         Text ztextComponent = ztextGO.AddComponent<Text>();
-        ztextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 0, -1));
-        ztextGO.transform.rotation = Quaternion.LookRotation(transform.position - GameObject.Find("Camera (eye)").transform.position);
+        ztextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 0, -1.25f));
+        LookAt zLA = ztextGO.AddComponent<LookAt>();
+        zLA.target = GameObject.Find("Camera (eye)").transform;
         ztextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
         ztextGO.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
         ztextComponent.text = headlines[2];

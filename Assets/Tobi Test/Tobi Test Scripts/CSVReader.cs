@@ -35,7 +35,7 @@ public class CSVReader : MonoBehaviour {
                tableLengthZ * (float)rnd.NextDouble() - (tableLengthZ / 2));
             clipBoard.transform.position= tableTop.transform.position+vec;
             clipBoard.transform.Rotate(new Vector3(1,0,0),10f);
-
+            clipBoard.GetComponentInChildren<TextMesh>().text = f.Name.Replace(".csv","");
             //add clipboards click script
             ClipboardScript script = clipBoard.AddComponent<ClipboardScript>();
             script.file = f;
