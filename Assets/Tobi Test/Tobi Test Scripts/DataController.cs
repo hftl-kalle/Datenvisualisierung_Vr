@@ -122,7 +122,7 @@ public class DataController : MonoBehaviour {
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
             temp.transform.localPosition = new Vector3(posX, posY, posZ);
-            temp.transform.localScale = new Vector3(0.05f*overallSize.x , 0.05f*overallSize.y , 0.05f*overallSize.z);
+            temp.transform.localScale = new Vector3(0.05f , 0.05f, 0.05f);
             temp.tag = "pointInCloud";
             Rigidbody rb = temp.AddComponent<Rigidbody>();
             rb.isKinematic = true;
@@ -142,7 +142,7 @@ public class DataController : MonoBehaviour {
             LineRenderer lr = o2.AddComponent<LineRenderer>();
             lr.SetPosition(0, o1.transform.position);
             lr.SetPosition(1, o2.transform.position);
-            lr.SetWidth(0.05f, 0.05f);
+            lr.SetWidth(0.029f, 0.029f);
         }
     }
 
@@ -351,10 +351,10 @@ public class DataController : MonoBehaviour {
         createPoints();
         Dictionary<float, GameObject> zValues = new Dictionary<float, GameObject>();
         Dictionary<float, Color> colorValues = new Dictionary<float, Color>();
-        points[0].transform.localScale = new Vector3(0.01f * overallSize.x, 0.01f * overallSize.y, 0.01f * overallSize.z );
+        points[0].transform.localScale = new Vector3(0.02f , 0.02f, 0.02f);
         for (int i = 1; i < points.Count; i++) {
             GameObject point = points[i];
-            point.transform.localScale = new Vector3(0.01f * overallSize.x, 0.01f * overallSize.y , 0.01f * overallSize.z );
+            point.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
             if (zValues.ContainsKey(point.transform.localPosition.z)) {
                 GameObject pointOld = zValues[point.transform.localPosition.z];
                 zValues.Remove(point.transform.localPosition.z);
@@ -377,9 +377,9 @@ public class DataController : MonoBehaviour {
 
     public void createAxis()
     {
-        var listy = data.getAllY();
-        var listx = data.getAllX();
-        var listz = data.getAllZ();
+        var listy = data.getAllY().Distinct().ToList(); ;
+        var listx = data.getAllX().Distinct().ToList(); ;
+        var listz = data.getAllZ().Distinct().ToList(); ;
         var minx = listx.Min();
         var maxx = listx.Max();
         var miny = listy.Min();
@@ -387,68 +387,74 @@ public class DataController : MonoBehaviour {
         var minz = listz.Min();
         var maxz = listz.Max();
         Vector3 xstart, xend, ystart, yend,zstart, zend;
+        bool istextx = false, istexty = false, istextz = false;
 
         //x
-        float temp;
-        if (float.TryParse(minx.ToString(),out temp)) {
-            if (temp < 0) xstart = new Vector3((overallSize.x / 2 - overallSize.x), 0, 0);
+        if (minx is float) {
+            if ((float)minx < 0) xstart = new Vector3((overallSize.x / 2 - overallSize.x), 0, 0);
             else xstart = new Vector3(0, 0, 0);
         }
         else
         {
             xstart = new Vector3(0, 0, 0);
+            istextx = true;
         }
 
-        if (float.TryParse(maxx.ToString(), out temp))
+        if (maxx is float)
         {
-            if (temp > 0) xend = new Vector3((overallSize.x - overallSize.x / 2), 0, 0);
+            if ((float)maxx > 0) xend = new Vector3((overallSize.x - overallSize.x / 2), 0, 0);
             else xend = new Vector3(0, 0, 0);
         }
         else
         {
-            xend = new Vector3(1, 0, 0);
+            xend = new Vector3(overallSize.x/2, 0, 0);
+            istextx = true;
         }
 
         //y
-        if(float.TryParse(miny.ToString(), out temp))
+        if(miny is float)
         {
-            if (temp < 0) ystart = new Vector3(0, (overallSize.y / 2 - overallSize.y), 0);
+            if ((float)miny < 0) ystart = new Vector3(0, (overallSize.y / 2 - overallSize.y), 0);
             else ystart = new Vector3(0, 0, 0);
         }
         else
         {
             ystart = new Vector3(0, 0, 0);
+            istexty = true;
         }
 
-        if (float.TryParse(maxy.ToString(), out temp))
+        if (maxy is float)
         {
-            if (temp > 0) yend = new Vector3(0, (overallSize.y - overallSize.y / 2), 0);
+            if ((float)maxy > 0) yend = new Vector3(0, (overallSize.y - overallSize.y / 2), 0);
             else yend = new Vector3(0, 0, 0);
         }
         else
         {
-            yend = new Vector3(0, 1, 0);
+            yend = new Vector3(0, overallSize.y/2, 0);
+            istexty = true;
         }
 
         //z
-        if (float.TryParse(minz.ToString(), out temp))
+        if (minz is float)
         {
-            if (temp < 0) zstart = new Vector3(0, 0, (overallSize.z - overallSize.z / 2));
+            if ((float)minz < 0) zstart = new Vector3(0, 0, (overallSize.z - overallSize.z / 2));
             else zstart = new Vector3(0, 0, 0);
         }
         else
         {
             zstart = new Vector3(0, 0, 0);
+            istextz = true;
         }
 
-        if (float.TryParse(maxz.ToString(), out temp))
+        if (maxz is float)
         {
-            if (temp > 0) zend = new Vector3(0, 0, (overallSize.z / 2 - overallSize.z));
+            if ((float)maxz > 0) zend = new Vector3(0, 0, (overallSize.z / 2 - overallSize.z));
             else zend = new Vector3(0, 0, 0);
         }
         else
         {
-            zend = new Vector3(0, 0, -1);
+            zend = new Vector3(0, 0, -overallSize.z/2);
+            istextz = true;
         }
 
 
@@ -524,6 +530,7 @@ public class DataController : MonoBehaviour {
         xtextComponent.text = headlines[0];
         xtextComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
         xtextComponent.fontSize = 20;
+        xtextComponent.alignment = TextAnchor.UpperCenter;
 
         GameObject ytextGO = new GameObject(gameObject.GetInstanceID().ToString());
         ytextGO.transform.parent = Canvas.transform;
@@ -537,6 +544,7 @@ public class DataController : MonoBehaviour {
         ytextComponent.text = headlines[1];
         ytextComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
         ytextComponent.fontSize = 20;
+        ytextComponent.alignment = TextAnchor.UpperCenter;
 
         GameObject ztextGO = new GameObject(gameObject.GetInstanceID().ToString());
         ztextGO.transform.parent = Canvas.transform;
@@ -551,5 +559,76 @@ public class DataController : MonoBehaviour {
         ztextComponent.text = headlines[2];
         ztextComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
         ztextComponent.fontSize = 20;
+        ztextComponent.alignment = TextAnchor.UpperCenter;
+
+        if (istextx)
+        {
+            float spacing =(overallSize.x/2) / (listx.Count );
+            float i = 1;
+            foreach (var name in listx)
+            {
+                GameObject axenames = new GameObject(gameObject.GetInstanceID().ToString());
+                axenames.transform.parent = Canvas.transform;
+                axenames.AddComponent<RectTransform>();
+                Text axetext = axenames.AddComponent<Text>();
+                // negativ end of z with offset of .25
+                axenames.transform.position = chartParent.transform.TransformPoint(new Vector3(spacing*i, -0.2f - 0.1f * (i % 3 == 0 ? 2 : (i % 3 == 2 ? 1 : 0)), 0));
+                LookAt axela = axenames.AddComponent<LookAt>();
+                axela.target = GameObject.Find("Camera (eye)").transform;
+                axenames.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 60);
+                axenames.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+                axetext.text = name.ToString();
+                axetext.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+                axetext.fontSize = 20;
+                axetext.alignment = TextAnchor.UpperCenter;
+                i++;
+            }
+        }
+        if (istexty)
+        {
+            float spacing =  (overallSize.y/2)/ (listy.Count );
+            int i = 1;
+            foreach (var name in listy)
+            {
+                GameObject axenames = new GameObject(gameObject.GetInstanceID().ToString());
+                axenames.transform.parent = Canvas.transform;
+                axenames.AddComponent<RectTransform>();
+                Text axetext = axenames.AddComponent<Text>();
+                // negativ end of z with offset of .25
+                axenames.transform.position = chartParent.transform.TransformPoint(new Vector3(0, spacing * i, -0.1f));
+                LookAt axela = axenames.AddComponent<LookAt>();
+                axela.target = GameObject.Find("Camera (eye)").transform;
+                axenames.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 60);
+                axenames.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+                axetext.text = name.ToString();
+                axetext.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+                axetext.fontSize = 20;
+                axetext.alignment = TextAnchor.UpperCenter;
+                i++;
+            }
+        }
+        if (istextz)
+        {
+            float spacing = (overallSize.z/2) / (listz.Count );
+            int i = 1;
+            foreach (var name in listz)
+            {
+                GameObject axenames = new GameObject(gameObject.GetInstanceID().ToString());
+                axenames.transform.parent = Canvas.transform;
+                axenames.AddComponent<RectTransform>();
+                Text axetext = axenames.AddComponent<Text>();
+                // negativ end of z with offset of .25
+                axenames.transform.position = chartParent.transform.TransformPoint(new Vector3(0, -0.2f-0.1f*(i%3==0?2: (i % 3 == 2 ? 1 : 0)), -spacing * i));
+                LookAt axela = axenames.AddComponent<LookAt>();
+                axela.target = GameObject.Find("Camera (eye)").transform;
+                axenames.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 60);
+                axenames.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+                axetext.text = name.ToString();
+                axetext.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+                axetext.fontSize = 20;
+                axetext.alignment = TextAnchor.UpperCenter;
+                i++;
+            }
+        }
     }
 }

@@ -34,7 +34,8 @@ public class ControllerScript : MonoBehaviour
         currentCollisionObject = coll.gameObject;
         try
         {
-            currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
+            if (currentCollisionObject.tag == "axis") currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
+            else currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
         }
         catch
         {
@@ -47,11 +48,11 @@ public class ControllerScript : MonoBehaviour
         try
         {
             if(currentCollisionObject.tag=="axis") currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Sprites/Default");
-            else currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Standard");
+            else currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Standard");
         }
         catch
         {
-            currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Standard");
+            
         }
         currentCollisionObject = null;
     }
@@ -146,7 +147,7 @@ public class ControllerScript : MonoBehaviour
                 }
             }
         }
-        else if (device.GetTouchUp(SteamVR_Controller.ButtonMask.Trigger))
+        if (device.GetTouchUp(SteamVR_Controller.ButtonMask.Trigger))
         {
             if (scaling) {
                 Vector3 scaleVec;
@@ -154,14 +155,15 @@ public class ControllerScript : MonoBehaviour
                 Vector3 heading = lastPosition - currPosition;
                 Debug.Log("lastPostion: "+lastPosition+ " currPostion: "+currPosition);
                 Debug.Log("heading: " + heading);
-                heading = heading / heading.magnitude;
+                heading*=1.5f;
+                heading=chartParent.transform.InverseTransformDirection(heading);
                 Debug.Log("heading: " + heading);
                 //check which axis
                 BoxCollider bc = scalingAxis.GetComponent<BoxCollider>();
                 DataController dc = chartParent.GetComponent<DataController>();
                 if (bc.gameObject.name == "Xaxis")
                 {
-                    scaleVec = new Vector3(heading.x, 0, 0);
+                    scaleVec = new Vector3(-heading.x, 0, 0);
                     Debug.Log("scaling x: "+scaleVec);
                     dc.setScale(scaleVec);
                     //chartParent.transform.FindChild("TerrainObj").GetComponent<Terrain>().terrainData.size=new();
@@ -170,7 +172,7 @@ public class ControllerScript : MonoBehaviour
                 {
                     if (bc.gameObject.name == "Yaxis")
                     {
-                        scaleVec = new Vector3(0, heading.y, 0);
+                        scaleVec = new Vector3(0, -heading.y, 0);
                         Debug.Log("scaling y: " + scaleVec);
                         dc.setScale(scaleVec);
                     }
