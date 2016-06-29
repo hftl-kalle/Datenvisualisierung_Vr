@@ -351,8 +351,8 @@ public class DataController : MonoBehaviour {
         createPoints();
         Dictionary<float, GameObject> zValues = new Dictionary<float, GameObject>();
         Dictionary<float, Color> colorValues = new Dictionary<float, Color>();
-        points[0].transform.localScale = new Vector3(0.02f , 0.02f, 0.02f);
-        for (int i = 1; i < points.Count; i++) {
+        //points[0].transform.localScale = new Vector3(0.02f , 0.02f, 0.02f);
+        for (int i = 0; i < points.Count; i++) {
             GameObject point = points[i];
             point.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
             if (zValues.ContainsKey(point.transform.localPosition.z)) {
