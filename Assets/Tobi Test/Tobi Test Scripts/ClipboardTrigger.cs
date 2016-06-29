@@ -19,6 +19,12 @@ public class ClipboardTrigger : MonoBehaviour {
 
         if (Application.loadedLevelName == "HMDScene")
         {
+            GameObject ctrlLeft = GameObject.Find("Controller (left)");
+            GameObject ctrlRight = GameObject.Find("Controller (right)");
+            ControllerScript ctrlLeftScript = ctrlLeft.GetComponent<ControllerScript>();
+            ControllerScript ctrlRightScript = ctrlRight.GetComponent<ControllerScript>();
+            if (ctrlLeftScript.joint) ctrlLeftScript.destroyJoint();
+            if (ctrlRightScript.joint) ctrlRightScript.destroyJoint();
             other.gameObject.transform.position = gameObject.transform.position + new Vector3(+0.14f, 0.15f, 0.1f);
             other.gameObject.transform.rotation = Quaternion.Euler(0, 0, 44);
         }

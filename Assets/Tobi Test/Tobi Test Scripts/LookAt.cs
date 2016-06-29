@@ -8,6 +8,7 @@ public class LookAt : MonoBehaviour
     void Update()
     {
         // Rotate every frame so it keeps looking at the target 
-        if(target) transform.LookAt(target);
+        if(target) transform.rotation = Quaternion.LookRotation(transform.position -target.position);
+       
     }
 }
