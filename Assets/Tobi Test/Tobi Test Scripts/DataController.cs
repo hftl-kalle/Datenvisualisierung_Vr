@@ -163,11 +163,11 @@ public class DataController : MonoBehaviour {
         GameObject terrainObj = new GameObject("TerrainObj");
         GameObject chartParent = GameObject.Find("chartParent");
         terrainObj.transform.parent = chartParent.transform;
-        terrainObj.transform.localPosition = -quadrantSize;
+        terrainObj.transform.localPosition = new Vector3(1,-1,0);
         //center the terrain
         TerrainData terrainData = new TerrainData();
         //set terrain size
-        terrainData.size = new Vector3(0.25f*overallSize.x , 1f*overallSize.y, 0.25f*overallSize.z);
+        terrainData.size = new Vector3(0.25f*overallSize.x , 0.5f*overallSize.y, 0.25f*overallSize.z);
         //influences terrain size why so ever
         terrainData.heightmapResolution = 128;
         terrainData.baseMapResolution = 128;
@@ -457,7 +457,7 @@ public class DataController : MonoBehaviour {
             istextz = true;
         }
 
-
+        float colorScale = 1 / 255;
         GameObject chartParent = GameObject.Find("chartParent");
         GameObject xaxis = new GameObject("Xaxis");
         Rigidbody xrb = xaxis.AddComponent<Rigidbody>();
@@ -496,14 +496,14 @@ public class DataController : MonoBehaviour {
         lrx.material = new Material(Shader.Find("Sprites/Default"));
         lrx.SetWidth(0.05f, 0.05f);
         lrx.useWorldSpace = false;
-        lrx.SetColors(Color.blue, Color.blue);
+        lrx.SetColors( new Color(1, 0.51f, 0.278f), new Color(1, 0.51f, 0.278f));
         lrx.SetPosition(0, xstart);
         lrx.SetPosition(1,xend);
 
         LineRenderer lry = yaxis.AddComponent<LineRenderer>();
         lry.material = new Material(Shader.Find("Sprites/Default"));
         lry.SetWidth(0.05f, 0.05f);
-        lry.SetColors(Color.blue, Color.blue);
+        lry.SetColors(new Color(1, 0.51f, 0.278f), new Color(1, 0.51f, 0.278f));
         lry.useWorldSpace = false;
         lry.SetPosition(0, ystart);
         lry.SetPosition(1, yend);
@@ -511,7 +511,7 @@ public class DataController : MonoBehaviour {
         LineRenderer lrz = zaxis.AddComponent<LineRenderer>();
         lrz.material = new Material(Shader.Find("Sprites/Default"));
         lrz.SetWidth(0.05f, 0.05f);
-        lrz.SetColors(Color.blue, Color.blue);
+        lrz.SetColors(new Color(1, 0.51f, 0.278f), new Color(1, 0.51f, 0.278f));
         lrz.useWorldSpace = false;
         lrz.SetPosition(0, zstart);
         lrz.SetPosition(1, zend);        
@@ -623,7 +623,13 @@ public class DataController : MonoBehaviour {
                 axela.target = GameObject.Find("Camera (eye)").transform;
                 axenames.GetComponent<RectTransform>().sizeDelta = new Vector2(100, 60);
                 axenames.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
-                axetext.text = name.ToString();
+                try{
+                    axetext.text = name.ToString();
+                }
+                catch
+                {
+
+                }
                 axetext.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
                 axetext.fontSize = 20;
                 axetext.alignment = TextAnchor.UpperCenter;
