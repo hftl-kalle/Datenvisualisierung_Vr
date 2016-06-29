@@ -14,11 +14,11 @@ public class DataController : MonoBehaviour {
         Multiple
     }
     private CSVDataObject data;
-    public Vector3 scale = new Vector3(1, 1, 1);
+
     private Vector3 origin = new Vector3(1, 1, 1);
 
     private static Vector3 overallSize = new Vector3(2, 2, 2);
-    private static Vector3 quadrantSize = overallSize / 2;
+    private static Vector3 quadrantSize=overallSize/2;
 
     public CurrentRenderMode RenderMode;
     private List<GameObject> points = new List<GameObject>();
@@ -40,12 +40,14 @@ public class DataController : MonoBehaviour {
 
     public void init(CSVDataObject csvData, Vector3 scaleParam) {
         init(csvData);
-        scale = scaleParam;
+        overallSize = scaleParam;
+        quadrantSize = overallSize / 2;
     }
 
     public void setScale(Vector3 scaleParam)
     {
-        scale += scaleParam;
+        overallSize += scaleParam;
+        quadrantSize = overallSize / 2;
         reRender();
     }
 
@@ -81,9 +83,9 @@ public class DataController : MonoBehaviour {
     }
 
     public void createPoints(float heatmapHeightReference = 0) {
-        if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y ;
         clearGraph();
-        createAxis();
+        if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
+        if(RenderMode!=CurrentRenderMode.HeatMap) createAxis();
 
         //TODO Comments and un-mess this
         //these maps are used to enumerate strings in the  lists
@@ -114,7 +116,7 @@ public class DataController : MonoBehaviour {
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
             temp.transform.localPosition = new Vector3(posX, posY, posZ);
-            temp.transform.localScale = new Vector3(0.05f*overallSize.x * scale.x, 0.05f*overallSize.y * scale.y, 0.05f*overallSize.z * scale.z);
+            temp.transform.localScale = new Vector3(0.05f*overallSize.x , 0.05f*overallSize.y , 0.05f*overallSize.z);
             temp.tag = "pointInCloud";
             Rigidbody rb = temp.AddComponent<Rigidbody>();
             rb.isKinematic = true;
@@ -159,7 +161,7 @@ public class DataController : MonoBehaviour {
         //center the terrain
         TerrainData terrainData = new TerrainData();
         //set terrain size
-        terrainData.size = new Vector3(0.25f*overallSize.x * scale.x, 1f*overallSize.y * scale.y, 0.25f*overallSize.z * scale.z);
+        terrainData.size = new Vector3(0.25f*overallSize.x , 1f*overallSize.y, 0.25f*overallSize.z);
         //influences terrain size why so ever
         terrainData.heightmapResolution = 128;
         terrainData.baseMapResolution = 128;
@@ -290,16 +292,20 @@ public class DataController : MonoBehaviour {
             terrainData.SetAlphamaps(0, 0, splatmapData);
         }
     }
-
-    public void clearGraph() {
-        foreach (GameObject point in points) {
-            GameObject.Destroy(point);
-        }
+    public void clearCanvas()
+    {
         Transform canvas = GameObject.Find("Canvas").transform;
         foreach (Transform text in canvas)
         {
             GameObject.Destroy(text.gameObject);
         }
+    }
+
+    public void clearGraph() {
+        foreach (GameObject point in points) {
+            GameObject.Destroy(point);
+        }
+        clearCanvas();
         GameObject.Destroy(GameObject.Find("TerrainObj"));
         GameObject.Destroy(GameObject.Find("Xaxis"));
         GameObject.Destroy(GameObject.Find("Yaxis"));
@@ -339,81 +345,164 @@ public class DataController : MonoBehaviour {
         createPoints();
         Dictionary<float, GameObject> zValues = new Dictionary<float, GameObject>();
         Dictionary<float, Color> colorValues = new Dictionary<float, Color>();
-        points[0].transform.localScale = new Vector3(0.01f * overallSize.x * scale.x, 0.01f * overallSize.y * scale.y, 0.01f * overallSize.z * scale.z);
+        points[0].transform.localScale = new Vector3(0.01f * overallSize.x, 0.01f * overallSize.y, 0.01f * overallSize.z );
         for (int i = 1; i < points.Count; i++) {
             GameObject point = points[i];
-            point.transform.localScale = new Vector3(0.01f * overallSize.x * scale.x, 0.01f * overallSize.y * scale.y, 0.01f * overallSize.z * scale.z);
-            if (zValues.ContainsKey(point.transform.position.z)) {
-                GameObject pointOld = zValues[point.transform.position.z];
-                zValues.Remove(point.transform.position.z);
+            point.transform.localScale = new Vector3(0.01f * overallSize.x, 0.01f * overallSize.y , 0.01f * overallSize.z );
+            if (zValues.ContainsKey(point.transform.localPosition.z)) {
+                GameObject pointOld = zValues[point.transform.localPosition.z];
+                zValues.Remove(point.transform.localPosition.z);
                 LineRenderer lr = pointOld.AddComponent<LineRenderer>();
                 lr.SetPosition(0, point.transform.position);
                 lr.SetPosition(1, pointOld.transform.position);
-                lr.SetColors(colorValues[point.transform.position.z], colorValues[point.transform.position.z]);
+                lr.SetColors(colorValues[point.transform.localPosition.z], colorValues[point.transform.localPosition.z]);
                 Material whiteDiffuseMat = new Material(Shader.Find("Sprites/Default"));
                 lr.material = whiteDiffuseMat;
-                lr.SetWidth(0.029f * scale.magnitude, 0.029f * scale.magnitude);
-                zValues.Add(point.transform.position.z, point);
+                lr.SetWidth(0.029f , 0.029f);
+                zValues.Add(point.transform.localPosition.z, point);
             } else {
-                zValues.Add(point.transform.position.z, point);
+                zValues.Add(point.transform.localPosition.z, point);
                 int count = colorValues.Keys.Count();
                 if (count >= colors.Length) count = colors.Length - 1;
-                colorValues.Add(point.transform.position.z, colors[count]);
+                colorValues.Add(point.transform.localPosition.z, colors[count]);
             }
         }
     }
 
     public void createAxis()
     {
+        var listy = data.getAllY();
+        var listx = data.getAllX();
+        var listz = data.getAllZ();
+        var minx = listx.Min();
+        var maxx = listx.Max();
+        var miny = listy.Min();
+        var maxy = listy.Max();
+        var minz = listz.Min();
+        var maxz = listz.Max();
+        Vector3 xstart, xend, ystart, yend,zstart, zend;
+
+        //x
+        float temp;
+        if (float.TryParse(minx.ToString(),out temp)) {
+            if (temp < 0) xstart = new Vector3((overallSize.x / 2 - overallSize.x), 0, 0);
+            else xstart = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            xstart = new Vector3(0, 0, 0);
+        }
+
+        if (float.TryParse(maxx.ToString(), out temp))
+        {
+            if (temp > 0) xend = new Vector3((overallSize.x - overallSize.x / 2), 0, 0);
+            else xend = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            xend = new Vector3(1, 0, 0);
+        }
+
+        //y
+        if(float.TryParse(miny.ToString(), out temp))
+        {
+            if (temp < 0) ystart = new Vector3(0, (overallSize.y / 2 - overallSize.y), 0);
+            else ystart = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            ystart = new Vector3(0, 0, 0);
+        }
+
+        if (float.TryParse(maxy.ToString(), out temp))
+        {
+            if (temp > 0) yend = new Vector3(0, (overallSize.y - overallSize.y / 2), 0);
+            else yend = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            yend = new Vector3(0, 1, 0);
+        }
+
+        //z
+        if (float.TryParse(minz.ToString(), out temp))
+        {
+            if (temp < 0) zstart = new Vector3(0, 0, (overallSize.z - overallSize.z / 2));
+            else zstart = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            zstart = new Vector3(0, 0, 0);
+        }
+
+        if (float.TryParse(maxz.ToString(), out temp))
+        {
+            if (temp > 0) zend = new Vector3(0, 0, (overallSize.z / 2 - overallSize.z));
+            else zend = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            zend = new Vector3(0, 0, -1);
+        }
+
+
         GameObject chartParent = GameObject.Find("chartParent");
         GameObject xaxis = new GameObject("Xaxis");
         Rigidbody xrb = xaxis.AddComponent<Rigidbody>();
         xrb.isKinematic = true;
-        xaxis.transform.parent = chartParent.transform;
         xaxis.tag = "axis";
         BoxCollider xbc = xaxis.AddComponent<BoxCollider>();
-        xbc.center = chartParent.transform.TransformPoint( new Vector3(0, 0, 0));
-        xbc.size = new Vector3(2, 0.05f, 0.05f);
+        xbc.center = new Vector3(0, 0, 0);
+        xbc.size = new Vector3(overallSize.x, 0.05f, 0.05f);
+        xaxis.transform.position = chartParent.transform.position;
+        xaxis.transform.rotation = chartParent.transform.rotation;
+        xaxis.transform.parent = chartParent.transform;
 
         GameObject yaxis = new GameObject("Yaxis");
         Rigidbody yrb = yaxis.AddComponent<Rigidbody>();
         yrb.isKinematic = true;
-        yaxis.transform.parent = chartParent.transform;
         yaxis.tag = "axis";
         BoxCollider ybc = yaxis.AddComponent<BoxCollider>();
-        ybc.center = chartParent.transform.TransformPoint(new Vector3(0, 0, 0));
-        ybc.size = new Vector3(0.05f, 2, 0.05f);
+        ybc.center = new Vector3(0, 0, 0);
+        ybc.size = new Vector3(0.05f, overallSize.y, 0.05f);
+        yaxis.transform.position = chartParent.transform.position;
+        yaxis.transform.rotation = chartParent.transform.rotation;
+        yaxis.transform.parent = chartParent.transform;
 
         GameObject zaxis = new GameObject("Zaxis");
         Rigidbody zrb = zaxis.AddComponent<Rigidbody>();
         zrb.isKinematic = true;
-        zaxis.transform.parent = chartParent.transform;
         zaxis.tag = "axis";
         BoxCollider zbc = zaxis.AddComponent<BoxCollider>();
-        zbc.center = chartParent.transform.TransformPoint(new Vector3(0, 0, 0));
-        zbc.size = new Vector3(0.05f, 0.05f, 2);
+        zbc.center = new Vector3(0, 0, 0);
+        zbc.size = new Vector3(0.05f, 0.05f, overallSize.z);
+        zaxis.transform.position = chartParent.transform.position;
+        zaxis.transform.rotation = chartParent.transform.rotation;
+        zaxis.transform.parent = chartParent.transform;
 
         LineRenderer lrx = xaxis.AddComponent<LineRenderer>();
         lrx.material = new Material(Shader.Find("Sprites/Default"));
         lrx.SetWidth(0.05f, 0.05f);
-        lrx.SetColors(Color.blue, Color.blue);
-        lrx.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(1, 0, 0)));
-        lrx.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(-1, 0, 0)));
         lrx.useWorldSpace = false;
+        lrx.SetColors(Color.blue, Color.blue);
+        lrx.SetPosition(0, xstart);
+        lrx.SetPosition(1,xend);
+
         LineRenderer lry = yaxis.AddComponent<LineRenderer>();
         lry.material = new Material(Shader.Find("Sprites/Default"));
         lry.SetWidth(0.05f, 0.05f);
         lry.SetColors(Color.blue, Color.blue);
-        lry.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(0, 1, 0)));
-        lry.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(0, -1, 0)));
         lry.useWorldSpace = false;
+        lry.SetPosition(0, ystart);
+        lry.SetPosition(1, yend);
+
         LineRenderer lrz = zaxis.AddComponent<LineRenderer>();
         lrz.material = new Material(Shader.Find("Sprites/Default"));
         lrz.SetWidth(0.05f, 0.05f);
         lrz.SetColors(Color.blue, Color.blue);
-        lrz.SetPosition(0, chartParent.transform.TransformPoint(new Vector3(0, 0, 1)));
-        lrz.SetPosition(1, chartParent.transform.TransformPoint(new Vector3(0, 0, -1)));
         lrz.useWorldSpace = false;
+        lrz.SetPosition(0, zstart);
+        lrz.SetPosition(1, zend);        
 
         string[] headlines = data.getHeadlines();
         GameObject Canvas = GameObject.Find("Canvas");
@@ -421,7 +510,7 @@ public class DataController : MonoBehaviour {
         xtextGO.transform.parent = Canvas.transform;
         xtextGO.AddComponent<RectTransform>();
         Text xtextComponent = xtextGO.AddComponent<Text>();
-        xtextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(1, 0, 0));
+        xtextGO.transform.position = chartParent.transform.TransformPoint(new Vector3((overallSize.x - overallSize.x / 2), 0, 0));
         LookAt xLA = xtextGO.AddComponent<LookAt>();
         xLA.target = GameObject.Find("Camera (eye)").transform;
         xtextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
@@ -434,7 +523,7 @@ public class DataController : MonoBehaviour {
         ytextGO.transform.parent = Canvas.transform;
         ytextGO.AddComponent<RectTransform>();
         Text ytextComponent = ytextGO.AddComponent<Text>();
-        ytextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 1, 0));
+        ytextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, (overallSize.y - overallSize.y / 2), 0));
         LookAt yLA = ytextGO.AddComponent<LookAt>();
         yLA.target = GameObject.Find("Camera (eye)").transform;
         ytextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);
@@ -447,7 +536,8 @@ public class DataController : MonoBehaviour {
         ztextGO.transform.parent = Canvas.transform;
         ztextGO.AddComponent<RectTransform>();
         Text ztextComponent = ztextGO.AddComponent<Text>();
-        ztextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 0, -1.25f));
+        // negativ end of z with offset of .25
+        ztextGO.transform.position = chartParent.transform.TransformPoint(new Vector3(0, 0, (overallSize.z / 2 - overallSize.z) -0.25f));
         LookAt zLA = ztextGO.AddComponent<LookAt>();
         zLA.target = GameObject.Find("Camera (eye)").transform;
         ztextGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 160);

@@ -15,7 +15,7 @@ public class ControllerScript : MonoBehaviour
 
 
     SteamVR_TrackedObject trackedObj;
-    FixedJoint joint;
+    public FixedJoint joint;
 
     void Awake()
     {
@@ -34,11 +34,10 @@ public class ControllerScript : MonoBehaviour
         currentCollisionObject = coll.gameObject;
         try
         {
-            currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
+            currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
         }
         catch
         {
-            currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
         }
         
     }
@@ -63,6 +62,12 @@ public class ControllerScript : MonoBehaviour
         currentCollisionPoint=contactPoint.point; //this is the Vector3 position of the point of contact
     }
 
+    public void destroyJoint()
+    {
+        var go = joint.gameObject;
+        Object.Destroy(joint);
+        joint = null;
+    }
 
     void FixedUpdate()
     {
@@ -135,6 +140,7 @@ public class ControllerScript : MonoBehaviour
                             scalingAxis = currentCollisionObject;
                             lastPosition = currPosition;
                             scaling = true;
+                            Debug.Log("Scale on");
                         }
                     }
                 }
@@ -143,28 +149,39 @@ public class ControllerScript : MonoBehaviour
         else if (device.GetTouchUp(SteamVR_Controller.ButtonMask.Trigger))
         {
             if (scaling) {
+                Vector3 scaleVec;
                 GameObject chartParent = GameObject.Find("chartParent");
                 Vector3 heading = lastPosition - currPosition;
+                Debug.Log("lastPostion: "+lastPosition+ " currPostion: "+currPosition);
+                Debug.Log("heading: " + heading);
                 heading = heading / heading.magnitude;
+                Debug.Log("heading: " + heading);
                 //check which axis
                 BoxCollider bc = scalingAxis.GetComponent<BoxCollider>();
                 DataController dc = chartParent.GetComponent<DataController>();
-                if (bc.size.x == 2)
+                if (bc.gameObject.name == "Xaxis")
                 {
-                    dc.setScale(new Vector3(heading.x, 0, 0));
+                    scaleVec = new Vector3(heading.x, 0, 0);
+                    Debug.Log("scaling x: "+scaleVec);
+                    dc.setScale(scaleVec);
                     //chartParent.transform.FindChild("TerrainObj").GetComponent<Terrain>().terrainData.size=new();
                 }
                 else
                 {
-                    if (bc.size.y == 2)
+                    if (bc.gameObject.name == "Yaxis")
                     {
-                        dc.setScale(new Vector3(0, heading.y, 0));
+                        scaleVec = new Vector3(0, heading.y, 0);
+                        Debug.Log("scaling y: " + scaleVec);
+                        dc.setScale(scaleVec);
                     }
                     else
                     {
-                        dc.setScale(new Vector3(0, 0, heading.z));
+                        scaleVec = new Vector3(0, 0, heading.z);
+                        Debug.Log("scaling z: "+ scaleVec);
+                        dc.setScale(scaleVec);
                     }
                 }
+                Debug.Log("Scale Off");
                 scaling = false;
             }
             if (joint != null)
