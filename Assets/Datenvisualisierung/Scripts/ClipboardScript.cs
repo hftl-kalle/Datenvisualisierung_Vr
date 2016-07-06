@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
-using UnityEditor;
 
 class ClipboardScript : MonoBehaviour {
     public FileInfo file;
@@ -66,7 +65,7 @@ class ClipboardScript : MonoBehaviour {
         
 
         if (csvData == null) {
-            EditorUtility.DisplayDialog("Error", "Your csv seems to be invalid. Atleast x and y are required", "Ok");
+            Debug.Log("Error "+ "Your csv seems to be invalid. Atleast x and y are required "+ "Ok");
         }
     }
 

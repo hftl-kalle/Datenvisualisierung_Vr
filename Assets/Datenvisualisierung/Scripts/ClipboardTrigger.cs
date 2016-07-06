@@ -21,10 +21,26 @@ public class ClipboardTrigger : MonoBehaviour {
         {
             GameObject ctrlLeft = GameObject.Find("Controller (left)");
             GameObject ctrlRight = GameObject.Find("Controller (right)");
-            ControllerScript ctrlLeftScript = ctrlLeft.GetComponent<ControllerScript>();
-            ControllerScript ctrlRightScript = ctrlRight.GetComponent<ControllerScript>();
-            if (ctrlLeftScript.joint) ctrlLeftScript.destroyJoint();
-            if (ctrlRightScript.joint) ctrlRightScript.destroyJoint();
+            try
+            {
+                ControllerScript ctrlLeftScript = ctrlLeft.GetComponent<ControllerScript>();
+                if (ctrlLeftScript.joint) ctrlLeftScript.destroyJoint();
+            }
+            catch
+            {
+                Debug.Log("Missing Controller");
+            }
+
+            try
+            {
+                ControllerScript ctrlRightScript = ctrlRight.GetComponent<ControllerScript>();
+                if (ctrlRightScript.joint) ctrlRightScript.destroyJoint();
+            }
+            catch
+            {
+                Debug.Log("Missing Controller");
+            }
+
             other.gameObject.transform.position = gameObject.transform.position + new Vector3(+0.14f, 0.15f, 0.1f);
             other.gameObject.transform.rotation = Quaternion.Euler(0, 0, 44);
         }
