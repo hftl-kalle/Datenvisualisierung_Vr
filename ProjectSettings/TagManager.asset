@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - clipboard
+  - pointInCloud
+  - axis
+  - holding_button
   layers:
   - Default
   - TransparentFX
