@@ -2236,8 +2236,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentCollisionObject: {fileID: 0}
+  scalingAxis: {fileID: 0}
   attachPoint: {fileID: 5447134}
   currentCollisionPoint: {x: 0, y: 0, z: 0}
+  scaleValue: 0.5
+  xyzscale: 2
+  joint: {fileID: 0}
 --- !u!114 &11444842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2335,8 +2339,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentCollisionObject: {fileID: 0}
+  scalingAxis: {fileID: 0}
   attachPoint: {fileID: 5467008}
   currentCollisionPoint: {x: 0, y: 0, z: 0}
+  scaleValue: 0.5
+  xyzscale: 2
+  joint: {fileID: 0}
 --- !u!114 &11482760
 MonoBehaviour:
   m_ObjectHideFlags: 1
