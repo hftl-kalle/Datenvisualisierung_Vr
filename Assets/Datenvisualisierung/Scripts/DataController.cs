@@ -44,6 +44,10 @@ public class DataController : MonoBehaviour {
         quadrantSize = overallSize / 2;
     }
 
+	/// <summary>
+	/// changes the scale of the diagramm and recalculates quadrant size
+	/// </summary>
+	/// <param name="scaleParam">Scale parameter.</param>
     public void setScale(Vector3 scaleParam)
     {
         overallSize += scaleParam;
@@ -51,6 +55,9 @@ public class DataController : MonoBehaviour {
         reRender();
     }
 
+	/// <summary>
+	/// rerenders the currently selected graphtype
+	/// </summary>
     public void reRender()
     {
         switch (RenderMode)
@@ -298,6 +305,10 @@ public class DataController : MonoBehaviour {
             terrainData.SetAlphamaps(0, 0, splatmapData);
         }
     }
+
+	/// <summary>
+	/// Clears the canvas of ui text.
+	/// </summary>
     public void clearCanvas()
     {
         Transform canvas = GameObject.Find("Canvas").transform;
@@ -375,6 +386,9 @@ public class DataController : MonoBehaviour {
         }
     }
 
+	/// <summary>
+	/// Creates the axis for the diagram.
+	/// </summary>
     public void createAxis()
     {
         var listy = data.getAllY().Distinct().ToList(); ;
@@ -389,6 +403,7 @@ public class DataController : MonoBehaviour {
         Vector3 xstart, xend, ystart, yend,zstart, zend;
         bool istextx = false, istexty = false, istextz = false;
 
+		#region check if min and max values are numbers and truncate axis if there are no negative values
         //x
         if (minx is float) {
             if ((float)minx < 0) xstart = new Vector3((overallSize.x / 2 - overallSize.x), 0, 0);
@@ -456,7 +471,9 @@ public class DataController : MonoBehaviour {
             zend = new Vector3(0, 0, -overallSize.z/2);
             istextz = true;
         }
+		#endregion
 
+		#region create gameobjects for the axes with coresponding colliders
         float colorScale = 1 / 255;
         GameObject chartParent = GameObject.Find("chartParent");
         GameObject xaxis = new GameObject("Xaxis");
@@ -491,7 +508,9 @@ public class DataController : MonoBehaviour {
         zaxis.transform.position = chartParent.transform.position;
         zaxis.transform.rotation = chartParent.transform.rotation;
         zaxis.transform.parent = chartParent.transform;
+		#endregion
 
+		#region create axes linerenderers
         LineRenderer lrx = xaxis.AddComponent<LineRenderer>();
         lrx.material = new Material(Shader.Find("Sprites/Default"));
         lrx.SetWidth(0.05f, 0.05f);
@@ -515,7 +534,9 @@ public class DataController : MonoBehaviour {
         lrz.useWorldSpace = false;
         lrz.SetPosition(0, zstart);
         lrz.SetPosition(1, zend);        
+		#endregion
 
+		#region add axes identifier/text
         string[] headlines = data.getHeadlines();
         GameObject Canvas = GameObject.Find("Canvas");
         GameObject xtextGO = new GameObject(gameObject.GetInstanceID().ToString());
@@ -560,7 +581,9 @@ public class DataController : MonoBehaviour {
         ztextComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
         ztextComponent.fontSize = 20;
         ztextComponent.alignment = TextAnchor.UpperCenter;
+		#endregion
 
+		#region check if axes value is text if so add it to axes. numbers were just too finicky
         if (istextx)
         {
             float spacing =(overallSize.x/2) / (listx.Count );
@@ -636,5 +659,6 @@ public class DataController : MonoBehaviour {
                 i++;
             }
         }
+		#endregion
     }
 }

@@ -17,8 +17,8 @@ public class ControllerScript : MonoBehaviour
     SteamVR_TrackedObject trackedObj;
     public FixedJoint joint;
 
-    void Awake()
-    {
+	void Awake(){
+   		// save controller positions
         trackedObj = GetComponent<SteamVR_TrackedObject>();
         lastPosition = transform.position;
         currPosition = transform.position;
@@ -34,6 +34,7 @@ public class ControllerScript : MonoBehaviour
         currentCollisionObject = coll.gameObject;
         try
         {
+			// change shader of axis and clipboard when hovered over
             if (currentCollisionObject.tag == "axis") currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
             else currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Custom/TestShader");
         }
@@ -47,6 +48,7 @@ public class ControllerScript : MonoBehaviour
     {
         try
         {
+			// change the shader back to standard if controller does not longer touch the object
             if(currentCollisionObject.tag=="axis") currentCollisionObject.GetComponent<Renderer>().material.shader = Shader.Find("Sprites/Default");
             else currentCollisionObject.transform.Find("Cube").GetComponent<Renderer>().material.shader = Shader.Find("Standard");
         }
@@ -150,6 +152,7 @@ public class ControllerScript : MonoBehaviour
         if (device.GetTouchUp(SteamVR_Controller.ButtonMask.Trigger))
         {
             if (scaling) {
+			// scale axes according to controller heading
                 Vector3 scaleVec;
                 GameObject chartParent = GameObject.Find("chartParent");
                 Vector3 heading = lastPosition - currPosition;
@@ -166,7 +169,6 @@ public class ControllerScript : MonoBehaviour
                     scaleVec = new Vector3(-heading.x, 0, 0);
                     Debug.Log("scaling x: "+scaleVec);
                     dc.setScale(scaleVec);
-                    //chartParent.transform.FindChild("TerrainObj").GetComponent<Terrain>().terrainData.size=new();
                 }
                 else
                 {
