@@ -5,6 +5,9 @@ using System;
 using UnityEngine.UI;
 using System.Linq;
 
+/// <summary>
+/// class generating the diagramms and controlling most interactions
+/// </summary>
 public class DataController : MonoBehaviour {
 
     public enum CurrentRenderMode {
@@ -13,17 +16,40 @@ public class DataController : MonoBehaviour {
         BiMap,
         Multiple
     }
+	/// <summary>
+	/// the value pairs and headlines
+	/// </summary>
     private CSVDataObject data;
 
+	/// <summary>
+	/// the origin of the diagramm in the play space
+	/// </summary>
     private Vector3 origin = new Vector3(1, 1, 1);
-
+	/// <summary>
+	/// the overall size of the diagramm
+	/// </summary>
     private static Vector3 overallSize = new Vector3(2, 2, 2);
+	/// <summary>
+	/// calculated quadrant size from overallsize
+	/// </summary>
     private static Vector3 quadrantSize=overallSize/2;
 
+	/// <summary>
+	/// the current diagramm typ to render
+	/// </summary>
     public CurrentRenderMode RenderMode;
+	/// <summary>
+	/// list of data pair representive game objects
+	/// </summary>
     private List<GameObject> points = new List<GameObject>();
+	/// <summary>
+	/// enum holding the colors for the heatmap
+	/// </summary>
     enum HeatmapLayers : int { DarkBlue, LightBlue, Green, Yellow, Orange, Red };
 
+	/// <summary>
+	/// enum holding the heigth threshold for the different heatmap colors between 1 and 0
+	/// </summary>
     Dictionary<HeatmapLayers, float> heatmapColorThreshold = new Dictionary<HeatmapLayers, float>() {
         {HeatmapLayers.DarkBlue, 0.25f},
         {HeatmapLayers.LightBlue, 0.45f},
@@ -33,11 +59,20 @@ public class DataController : MonoBehaviour {
         {HeatmapLayers.Red, 1f}
     };
 
+	/// <summary>
+	/// initialize the data
+	/// </summary>
+	/// <param name="csvData"></param>
     public void init(CSVDataObject csvData) {
         this.data = csvData;
         //GameObject.Find("chartParent").transform.localPosition = origin;
     }
 
+	/// <summary>
+	/// initialize the dara with custom overall scale
+	/// </summary>
+	/// <param name="csvData"></param>
+	/// <param name="scaleParam">the overall diagramm scale</param>
     public void init(CSVDataObject csvData, Vector3 scaleParam) {
         init(csvData);
         overallSize = scaleParam;
@@ -48,8 +83,7 @@ public class DataController : MonoBehaviour {
 	/// changes the scale of the diagramm and recalculates quadrant size
 	/// </summary>
 	/// <param name="scaleParam">Scale parameter.</param>
-    public void setScale(Vector3 scaleParam)
-    {
+    public void setScale(Vector3 scaleParam){
         overallSize += scaleParam;
         quadrantSize = overallSize / 2;
         reRender();
@@ -58,10 +92,8 @@ public class DataController : MonoBehaviour {
 	/// <summary>
 	/// rerenders the currently selected graphtype
 	/// </summary>
-    public void reRender()
-    {
-        switch (RenderMode)
-        {
+    public void reRender(){
+        switch (RenderMode){
             case CurrentRenderMode.LineGraph:
                 createLineGraph();
                 break;
@@ -79,7 +111,12 @@ public class DataController : MonoBehaviour {
         }
     }
 
-    //return value from map or insert it if not found
+	/// <summary>
+	/// helper method to return value from map or insert it if not found
+	/// </summary>
+	/// <param name="d">the map</param>
+	/// <param name="s">the key</param>
+	/// <returns>the value</returns>
     private float safeGetValueFromMap(Dictionary<string, float> d, string s) {
         if (s == null) {
             return 0;
@@ -92,6 +129,10 @@ public class DataController : MonoBehaviour {
         }
     }
 
+	/// <summary>
+	/// creating gameobjects out of the value pairs from the csv file
+	/// </summary>
+	/// <param name="heatmapHeightReference"> specifiy a maximum height for the heatmap spikes, ignored if 0</param>
     public void createPoints(float heatmapHeightReference = 0) {
         clearGraph();
         if (heatmapHeightReference == 0) heatmapHeightReference = quadrantSize.y;
@@ -109,11 +150,11 @@ public class DataController : MonoBehaviour {
 
         foreach (MultidimensionalObject obj in data.getData()) {
 
-            //Get values
+			//get float values from csv, convert to float if in string format
             float x = (obj.getX() is float) ? (float)obj.getX() : safeGetValueFromMap(stringValsX, (string)obj.getX());
             float y = (obj.getY() is float) ? (float)obj.getY() : safeGetValueFromMap(stringValsY, (string)obj.getY());
             float z = (obj.getZ() is float) ? (float)obj.getZ() : safeGetValueFromMap(stringValsZ, (string)obj.getZ());
-
+			#region calc position if each value pair in the 3d space
             float absoluteX = (ListUtils.getMaxAbsolutAmount(data.getAllX()) != 0f) ? ListUtils.getMaxAbsolutAmount(data.getAllX()) : 1;
             float scaleX = quadrantSize.x / absoluteX;
             float posX = x * scaleX;
@@ -125,7 +166,9 @@ public class DataController : MonoBehaviour {
             float absoluteY = (ListUtils.getMaxAbsolutAmount(data.getAllY()) != 0f) ? ListUtils.getMaxAbsolutAmount(data.getAllY()) : 1;
             float scaleY = heatmapHeightReference / absoluteY;
             float posY = y * scaleY;
+			#endregion
 
+			//create the gameobject and assign the point script to it holding the text display functions
             GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             temp.transform.parent = chartParent.transform;
             temp.transform.localPosition = new Vector3(posX, posY, posZ);
@@ -140,6 +183,9 @@ public class DataController : MonoBehaviour {
         }
     }
 
+	/// <summary>
+	/// create diagramm connecting all lines
+	/// </summary>
     public void createLineGraph() {
         RenderMode = CurrentRenderMode.LineGraph;
         createPoints();
@@ -153,6 +199,9 @@ public class DataController : MonoBehaviour {
         }
     }
 
+	/// <summary>
+	/// generate heatmap
+	/// </summary>
     public void createHeatMap() {
         RenderMode = CurrentRenderMode.HeatMap;
         //float heatmapHeightReference = ListUtils.getHighestFloat(data.getAllW());
@@ -186,11 +235,12 @@ public class DataController : MonoBehaviour {
         int _heightmapWidth = htmap.GetUpperBound(0);
         int _heightmapHeight = htmap.GetUpperBound(0);
 
+		//init terrains additional data
         TerrainCollider terrainCollider = terrainObj.AddComponent<TerrainCollider>();
         Terrain terrain = terrainObj.AddComponent<Terrain>();
         terrainCollider.terrainData = terrainData;
         terrain.terrainData = terrainData;
-   
+		//assign textures to the array for later usage
         Texture2D[] terrainTextures = new Texture2D[6];
         for (int o = 0; o < terrainTextures.Length; o++) {
             terrainTextures[o] = (Texture2D)Resources.Load("Textures/layer" + o);
@@ -203,9 +253,10 @@ public class DataController : MonoBehaviour {
             tex[i].tileSize = new Vector2(1, 1);    //Sets the size of the texture
         }
         terrainData.splatPrototypes = tex;
+		//resolution of the terrain, higher resolutions will result in framerate drops because terrains are not well optimized for high resolution when used in very small sizes
         terrainData.alphamapResolution = 128;
 
-
+		//predefine splatmap data
         float[,,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
 
         for (int x = 0; x < splatmapData.GetLength(0); x++) {
@@ -215,6 +266,7 @@ public class DataController : MonoBehaviour {
         }
 
         for (int k = 0; k < points.Count; k++) {
+			//disable points so they aren't displayed in the scene
             points[k].SetActive(false);
             if (points[k].transform.position.y > 0) {
 
@@ -226,9 +278,9 @@ public class DataController : MonoBehaviour {
                 int z1 = (int)((_heightmapHeight / 2) + ( points[k].transform.localPosition.z * (_heightmapHeight / 2)));
 
                 float pointHeigth = (points[k].transform.localPosition.y + quadrantSize.y) / overallSize.y;
-
+				//calculated x and z position of the point inside the terrainmain and calc the height of the point
                 htmap[z1, x1] = pointHeigth;
-
+				#region assign the textures based on the set height
                 range++;
                 for (int rx = -range; rx <= range; rx++) {
                     for (int rz = -range; rz <= range; rz++) {
@@ -269,6 +321,8 @@ public class DataController : MonoBehaviour {
                         }
                     }
                 }
+				#endregion
+				#region smooth the area around the set height to achive a better result if the data is not completle populated
                 range--;
                 //iterate from - range  to + range
                 for (int rx = -range; rx <= range; rx++) {                  
@@ -300,6 +354,7 @@ public class DataController : MonoBehaviour {
                         }
                     }
                 }
+				#endregion
             }
             terrain.terrainData.SetHeights(0, 0, htmap);
             terrainData.SetAlphamaps(0, 0, splatmapData);
@@ -318,6 +373,9 @@ public class DataController : MonoBehaviour {
         }
     }
 
+	/// <summary>
+	/// destroy graph and all data points
+	/// </summary>
     public void clearGraph() {
         foreach (GameObject point in points) {
             GameObject.Destroy(point);
@@ -330,6 +388,9 @@ public class DataController : MonoBehaviour {
         points = new List<GameObject>();
     }
 
+	/// <summary>
+	/// destroy graph and all data points immediately
+	/// </summary>
     public void clearGraphImmediate() {
         foreach (GameObject point in points) {
             GameObject.DestroyImmediate(point);
@@ -346,6 +407,9 @@ public class DataController : MonoBehaviour {
         points = new List<GameObject>();
     }
 
+	/// <summary>
+	/// create bi cube
+	/// </summary>
     public void createBiMap() {
         RenderMode= CurrentRenderMode.BiMap;
         createPoints();
@@ -356,6 +420,9 @@ public class DataController : MonoBehaviour {
             
     }
 
+	/// <summary>
+	/// create diagramm where all points are connected based on there z axis
+	/// </summary>
     public void createMultiple2DGraphs() {
         Color[] colors = new Color[] { Color.black, Color.red, Color.yellow, Color.green,Color.magenta, new Color(1f/165f, 1f / 42f, 1f / 42f, 1), new Color(1f / 255f, 1f / 20f, 1f / 147f, 1)};
         RenderMode = CurrentRenderMode.Multiple;
