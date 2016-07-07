@@ -1,7 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Text;
+﻿using System.Text;
 
+/// <summary>
+/// custom object holding the values of one data point
+/// </summary>
 public class MultidimensionalObject {
 
     private object x;
@@ -49,6 +50,10 @@ public class MultidimensionalObject {
         return new object[4] { this.x, this.y, this.z, this.w };
     }
 
+    /// <summary>
+    /// return a fomratted string representation of the data pair
+    /// </summary>
+    /// <returns>string representation of the data pair</returns>
     public string toString() {
         StringBuilder sb = new StringBuilder();
         sb.Append("x: ").Append(this.x != null ? this.x.ToString() : "Null");

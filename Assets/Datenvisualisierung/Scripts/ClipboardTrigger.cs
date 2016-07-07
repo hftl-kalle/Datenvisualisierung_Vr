@@ -3,10 +3,13 @@ using System.Collections;
 
 public class ClipboardTrigger : MonoBehaviour {
 
-    /*if clipboard moved inside box colldier
-        move clipboard to final position inside the holding
-        disable kinematic while doing so to reset applied forces
-        */
+    /// <summary>
+    /// triggers if a clipboard object is moved towards the holding object
+    /// if clipboard moved inside box colldier
+    ///move clipboard to final position inside the holding
+     ///   disable kinematic while doing so to reset applied forces
+        /// </summary>
+        /// <param name="other"></param>
     public void OnTriggerEnter(Collider other) {
         other.gameObject.GetComponent<ClipboardScript>().setHold(false);
         //load the csv;
@@ -38,7 +41,12 @@ public class ClipboardTrigger : MonoBehaviour {
         other.gameObject.GetComponent<Rigidbody>().isKinematic = false;
     }
 
-    /* if the clipboard is moved out of the bx collider unload the csv and disable trigger for 2 seconds to allow moving the clipboard out of the way */
+    /// <summary>
+    /// triggers when the clipboard is moved away from the holding object
+    /// if the clipboard is moved out of the bx collider unload the csv and disable trigger for 2 seconds to allow moving the clipboard out of the way
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
     IEnumerator OnTriggerExit(Collider other) {
         other.gameObject.GetComponent<ClipboardScript>().unloadFile();
         gameObject.GetComponent<BoxCollider>().isTrigger = false;

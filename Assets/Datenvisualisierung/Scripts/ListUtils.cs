@@ -1,12 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// utilities for usage with list objects
+/// </summary>
 public static class ListUtils {
 
     //if too slow consider caching
+    /// <summary>
+    /// return the highest float in the given list
+    /// if it is a string list return the count
+    /// </summary>
+    /// <param name="list">the list to search in</param>
+    /// <returns>highest float representive in the list</returns>
     public static float getHighestFloat(List<object> list) {
 
         float returnValue = 0;
@@ -26,6 +34,12 @@ public static class ListUtils {
         return returnValue;
     }
 
+    /// <summary>
+    /// returns the lowest float value found in the list
+    /// if the list contains only strings return 0
+    /// </summary>
+    /// <param name="list">the list to search in</param>
+    /// <returns>return the lowest found float value</returns>
     public static float getLowestFloat(List<object> list) {
         float returnValue = 0;
         if (list.Count <= 0) return returnValue;
@@ -38,6 +52,12 @@ public static class ListUtils {
         return returnValue;
     }
 
+    /// <summary>
+    /// return the maximum absolut amount found in the list
+    /// if it is a string list return the list count
+    /// </summary>
+    /// <param name="list">the list to search in</param>
+    /// <returns>maximum absolut value in list</returns>
     public static float getMaxAbsolutAmount(List<object> list) {
 
         if (list.Count <= 0) return 0;
@@ -47,6 +67,11 @@ public static class ListUtils {
         return list.Select(x => Math.Abs((float)x)).ToList().Max();
     }
 
+    /// <summary>
+    /// get the distinct amount of objects in the given list
+    /// </summary>
+    /// <param name="list">the list to search in</param>
+    /// <returns>distinct count</returns>
     private static float getAmountOfObjects(List<object> list) {
             return list.Distinct().Count() - 1;
     }
