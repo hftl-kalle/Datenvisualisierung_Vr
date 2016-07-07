@@ -1,32 +1,50 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 using System;
 
+/// <summary>
+/// Script attached to the Datapoints in the Diagrammview, Used to store the position aswell as Headlines and Values. 
+/// Used to display the headline and values to the user.
+/// </summary>
 public class PointScript : MonoBehaviour {
+
+    /// <summary>
+    /// Data headlines [x,y,z,w]
+    /// </summary>
     public string[] headlines = new string[4];
+    /// <summary>
+    /// Data values [x,y,z,w]
+    /// </summary>
     public object[] data = new object[4];
-    private bool active = false;
+    /// <summary>
+    /// whether or not the fourth value should be displayed
+    /// this value is used for additional information
+    /// </summary>
     public bool showAdditionalData = false;
 
+    /// <summary>
+    /// show text information on click
+    /// </summary>
     public void OnMouseDown() {
         toggleTextRenderer();
     }
 
+    /// <summary>
+    /// toggle the informational text for the sepcific data point
+    /// </summary>
     private void toggleTextRenderer() {
+
+        /// if the text is already displayed , disable it
         if (GameObject.Find(gameObject.GetInstanceID().ToString())) {
             GameObject.Destroy(GameObject.Find(gameObject.GetInstanceID().ToString()));
             return;
         }
-        /* GameObject tem = new GameObject(gameObject.GetInstanceID().ToString());
-         tem.transform.position = gameObject.transform.position;
-         MeshRenderer mr = tem.AddComponent<MeshRenderer>();
-         TextMesh tm = tem.AddComponent<TextMesh>();
-         tm.text = titleX + ": " + showX + "\n" + titleY + ": " + showY + "\n" + titleZ + ": " + showZ;
-         tm.fontSize = 50;
-         tm.characterSize = 12;*/
+
+
         GameObject Canvas = GameObject.Find("Canvas");
         GameObject chartParent = GameObject.Find("chartParent");
+
+        #region configure and display the text renderer
         GameObject textGO = new GameObject(gameObject.GetInstanceID().ToString());
         textGO.transform.parent = Canvas.transform;
         textGO.AddComponent<RectTransform>();
@@ -46,5 +64,6 @@ public class PointScript : MonoBehaviour {
 
         textComponent.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
         textComponent.fontSize = 33;
+        #endregion
     }
 }
