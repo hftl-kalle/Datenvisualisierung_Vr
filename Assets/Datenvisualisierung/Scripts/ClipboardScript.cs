@@ -3,23 +3,33 @@ using System.Collections;
 using System.IO;
 using UnityEditor;
 
+/// <summary>
+/// class attached to every clipboard object
+/// </summary>
 class ClipboardScript : MonoBehaviour {
     public FileInfo file;
     private Vector3 offset = new Vector3(0,0,2);
     private GameObject player;
     private bool hold = false;
 
+    /// <summary>
+    /// init vars 
+    /// </summary>
     public void Start() {
         player = GameObject.FindGameObjectWithTag("Player");
     }
 
-    //if clicked enable holding
+    /// <summary>
+    /// if clicked enable holding
+    /// </summary>
     public void OnMouseDown() {
         Cursor.visible = false;
         hold = true;
     }
 
-    //while holding active, the clipboard is offset away fom the player
+    /// <summary>
+    /// while holding active, the clipboard is offset away fom the player
+    /// </summary>
     public void Update() {
         if (hold) {
             transform.position = player.transform.position + offset;
@@ -28,19 +38,26 @@ class ClipboardScript : MonoBehaviour {
         
     }
 
-    //if mouse up disable holding and active cursor
+    /// <summary>
+    /// if mouse up disable holding and active cursor
+    /// </summary>
     public void OnMouseUp() {
         transform.position = transform.position;
         Cursor.visible = true;
         hold = false;
     }
 
-    //whether the clipboard should be moving with the player or not
+    /// <summary>
+    /// whether the clipboard should be moving with the player or not
+    /// </summary>
+    /// <param name="holding"></param>
     public void setHold(bool holding) {
         hold = holding;
     }
 
-    //load a csv file and display standard graph
+    /// <summary>
+    /// load a csv file and display standard graph
+    /// </summary>
     public void loadFile() {
         CSVDataObject csvData = CSVParser.loadCsv(file.FullName);
         //create chart parent
@@ -70,7 +87,9 @@ class ClipboardScript : MonoBehaviour {
         }
     }
 
-    //unload csv and destroy graph
+    /// <summary>
+    /// unload csv and destroy graph
+    /// </summary>
     public void unloadFile() {
         GameObject chartParent = GameObject.Find("chartParent");
         DataController dc = chartParent.GetComponent<DataController>();

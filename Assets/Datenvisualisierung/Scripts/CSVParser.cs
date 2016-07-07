@@ -9,6 +9,11 @@ using System.Linq;
 
 public static class CSVParser {
 
+    /// <summary>
+    /// parse the given csv files and return a list of all value pairs
+    /// </summary>
+    /// <param name="file">the csv file</param>
+    /// <returns>list of all value pairs found in the csv and the headlines as CSV Data Object</returns>
     public static CSVDataObject loadCsv(string file) {
 
         if (File.Exists(file)) {

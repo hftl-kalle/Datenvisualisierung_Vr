@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
 using System.IO;
-using System;
 
 public class CSVReader : MonoBehaviour {
  
@@ -10,6 +7,9 @@ public class CSVReader : MonoBehaviour {
         openCsvFromFolder();
     }
 
+    /// <summary>
+    /// load the csv file in the csv directory
+    /// </summary>
     public void openCsvFromFolder() {
         //path to .exe or document root + csv directory
         string directory = @Application.dataPath + "/../csv/";
@@ -40,7 +40,5 @@ public class CSVReader : MonoBehaviour {
             ClipboardScript script = clipBoard.AddComponent<ClipboardScript>();
             script.file = f;
         }
-        
     }
-
 }
